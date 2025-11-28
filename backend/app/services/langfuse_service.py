@@ -55,10 +55,21 @@ class LangfuseConfig:
             "metadata": metadata
         }
 
-    def get_prompt(self, prompt_id, label=None):
-        if label:
+    def get_prompt(self, prompt_name, label=None,version=None):
+        if label and version:
             return self.langfuse.get_prompt(
-                prompt_id,
+                prompt_name,
+                label=label,
+                version=version,
+            )   
+        elif label:
+            return self.langfuse.get_prompt(
+                prompt_name,
                 label=label,
             )
-        return self.langfuse.get_prompt(prompt_id)
+        elif version:
+            return self.langfuse.get_prompt(
+                prompt_name,
+                version=version,
+            )
+        return self.langfuse.get_prompt(prompt_name)
