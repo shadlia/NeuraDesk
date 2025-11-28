@@ -21,11 +21,41 @@
 
 ---
 
+## Current Progress
+
+**Status:** Phase 1 - LLM API Base (In Progress)  
+**Last Updated:** November 28, 2025
+
+### ✅ Completed Milestones
+- [x] FastAPI backend scaffolding
+- [x] Gemini 2.0 Flash API integration  
+- [x] LangChain integration for LLM orchestration
+- [x] Langfuse observability & monitoring setup
+- [x] Basic `/llm/ask` endpoint with question-answer functionality
+- [x] Environment configuration with `.env` support
+- [x] Request/Response models with Pydantic
+- [x] SDK v3 compatibility fixes for Langfuse
+
+### 🔄 In Progress
+- [ ] Testing and API validation
+- [ ] Frontend interface for LLM interaction
+- [ ] Error handling and edge cases
+
+### 📋 Phase 1 Next Steps
+1. Build simple frontend UI to test LLM endpoint
+2. Add conversation history/session management
+3. Implement streaming responses
+4. Complete Phase 1 before moving to Phase 2 (RAG)
+
+> 📊 **See [MILESTONES.md](./MILESTONES.md) for detailed progress tracking with granular task breakdown and timeline estimates.**
+
+---
+
 ## Project Scope (TODO)
 
 | Phase | TODO / Description | Skills / Concepts | Tools / Tech | Expected Output |
 |-------|-----------------|-----------------|---------------|----------------|
-| **1. LLM API Base** | TODO: Connect LLM API to answer questions from static text | Prompting, JSON output | OpenAI GPT-4/Gemini API, FastAPI | User asks question → AI answers from text input |
+| **1. LLM API Base** | ✅ **IN PROGRESS** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
 | **2. Document Ingestion / RAG** | TODO: Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Chroma / Pinecone, OpenAI / BGE embeddings | Ask questions → AI answers using documents |
 | **3. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
 | **4. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
@@ -45,6 +75,31 @@
 - **Fine-tuning:** LoRA, QLoRA, HuggingFace TRL  
 - **Backend / Deployment:** FastAPI, Docker, Redis, Vercel / Railway / GCP  
 - **Frontend / Dashboard:** React / Next.js, Streamlit (optional)  
+
+---
+
+## Current Project Structure
+
+```
+NeuraDesk/
+├── backend/
+│   ├── app/
+│   │   ├── main.py                    # FastAPI application entry point
+│   │   ├── routes/
+│   │   │   └── llm_routes.py         # /llm/ask endpoint
+│   │   ├── services/
+│   │   │   ├── llm_service.py        # Gemini LLM integration
+│   │   │   └── langfuse_service.py   # Langfuse observability
+│   │   └── models/
+│   │       └── llm_models.py         # Pydantic request/response models
+│   ├── data/                          # Future: Document storage
+│   ├── notebooks/                     # Future: Experimentation
+│   ├── requirements.txt               # Python dependencies
+│   ├── .env                          # Environment variables (API keys)
+│   └── venv/                         # Virtual environment
+├── frontend/                          # Future: React/Next.js UI
+└── README.md                         # Project documentation
+```
 
 ---
 
@@ -70,19 +125,14 @@
 
 ---
 
-## README / Documentation Structure (TODO)
+**Current Focus:**  
+- Complete Phase 1: LLM API with frontend testing interface  
+- Implement session management and conversation history
+- Add streaming responses for better UX
+- Begin Phase 2 planning: Document ingestion and RAG setup  
 
-1. Introduction: Project overview & goals  
-2. Installation / Setup: Instructions for local dev & cloud deployment  
-3. Usage: How to interact with the assistant (CLI / Web / API)  
-4. Architecture: Flowchart of LLM → RAG → Agents → Multimodal → Deployment  
-5. Roadmap: Table of phases & milestones  
-6. Contributing: Instructions for collaboration & extensions  
-
----
-
-**Next Steps:**  
-- Begin Phase 1: Connect LLM API → basic question answering  
-- Gradually implement TODO phases → evolving project  
-- Keep README updated with outputs, screenshots, and deployed links  
+**Maintenance Notes:**  
+- Keep dependencies updated (especially SDK versions)
+- Monitor Langfuse dashboard for LLM performance metrics
+- Document API changes and breaking updates  
 
