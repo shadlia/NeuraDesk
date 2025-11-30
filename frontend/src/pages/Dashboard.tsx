@@ -2,15 +2,21 @@ import { Brain, FileText, Settings, Zap } from "lucide-react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { StatsWidget, QuickActions, RecentConversations, InsightsWidget, FutureFeatureCard } from "@/components/dashboard/DashboardWidgets";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
+  const { session } = useAuth();
+  const userEmail = session?.user?.email;
+  const { user_metadata } = session?.user || {};
+  const userName = user_metadata?.first_name || user_metadata?.full_name || userEmail?.split("@")[0] || "Guest";
+
   return (
     <div className="min-h-screen bg-background font-body flex flex-col">
       <Navigation />
       
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar - Hidden on mobile, visible on desktop */}
-        <div className="hidden lg:block w-80 border-r bg-card/30 backdrop-blur-xl">
+        <div className="hidden lg:block h-full">
           <Sidebar />
         </div>
 
@@ -21,7 +27,7 @@ const Dashboard = () => {
             {/* Hero / Welcome */}
             <div className="space-y-2">
               <h1 className="text-3xl font-heading font-bold tracking-tight sm:text-4xl">
-                Good Morning, Guest! <span className="text-2xl">👋</span>
+                Good Morning, {userName}! <span className="text-2xl">👋</span>
               </h1>
               <p className="text-lg text-muted-foreground">
                 Ready to conquer the day? You have 3 new insights waiting for you.

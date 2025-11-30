@@ -39,6 +39,11 @@
 - [x] **Home Page Redesign:** Modern "Workspace" aesthetic, Hero preview, Blog/Contact sections
 - [x] **User Dashboard:** Interactive dashboard with stats, quick actions, and insights widgets
 - [x] **Navigation & Routing:** Implemented sidebar and top navigation structure
+- [x] **Authentication:** 
+  - Supabase Auth integration with Email OTP
+  - Protected routes (`/dashboard`, `/chat`)
+  - Custom email templates for verification
+  - Resend verification code functionality
 
 ### 🔄 In Progress
 - [ ] **Backend Integration:** Connecting Frontend to `/llm/ask` endpoint
@@ -143,4 +148,25 @@ NeuraDesk/
 - Keep dependencies updated (especially SDK versions)
 - Monitor Langfuse dashboard for LLM performance metrics
 - Document API changes and breaking updates  
+
+---
+
+## Authentication Setup
+
+NeuraDesk uses Supabase for authentication. To set this up:
+
+1.  **Supabase Project**: Create a project at [supabase.com](https://supabase.com).
+2.  **Environment Variables**: Add your keys to `frontend/.env`:
+    ```env
+    VITE_SUPABASE_URL=your_project_url
+    VITE_SUPABASE_PUBLISHABLE_KEY=your_anon_key
+    ```
+3.  **Email Template**: 
+    - Go to Authentication -> Email Templates -> Confirm Your Signup.
+    - Use the content from `supabase_email_template.html`.
+    - Ensure the template uses `{{ .Token }}` for the OTP code.
+4.  **Resend Functionality**:
+    - The app supports resending verification codes.
+    - Ensure your Supabase project's SMTP settings are configured correctly for reliable delivery, or use the default Supabase SMTP for testing (rate limits apply).
+
 

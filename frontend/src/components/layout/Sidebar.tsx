@@ -47,14 +47,18 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Default to collapsed on mobile (simplistic approach, ideally use media query hook)
+  const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
   const [activeTab, setActiveTab] = useState<"recent" | "saved">("recent");
 
   return (
     <aside 
       className={cn(
-        "relative border-r bg-sidebar backdrop-blur-sm transition-all duration-300",
-        isCollapsed ? "w-0 md:w-14" : "w-72 md:w-80"
+        "border-r bg-sidebar backdrop-blur-sm transition-all duration-300 z-40",
+        // Mobile: Absolute positioning, full height
+        "absolute inset-y-0 left-0 h-full md:relative",
+        // Width handling
+        isCollapsed ? "w-0 md:w-14 -translate-x-full md:translate-x-0" : "w-72 md:w-80 translate-x-0"
       )}
     >
       <div className="flex h-full flex-col">
@@ -70,7 +74,7 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
             variant="ghost"
             size="sm"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="h-8 w-8 p-0 hover:bg-accent/10"
+            className="h-8 w-8 p-0 hover:bg-accent/10 ml-auto"
           >
             <ChevronLeft 
               className={cn(

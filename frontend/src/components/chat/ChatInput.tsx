@@ -32,68 +32,64 @@ export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
   const isOverLimit = input.length > maxLength;
 
   return (
-    <form 
-      onSubmit={handleSubmit}
-      className="sticky bottom-0 border-t bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 p-4 shadow-[0_-4px_6px_-1px_rgb(0_0_0_/_0.05)]"
-    >
-      <div className="mx-auto max-w-4xl space-y-3">
-        {/* Input Area */}
-        <div className="relative flex gap-3 items-end">
-          <div className="relative flex-1">
-            <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask me anything... (Shift + Enter for new line)"
-              disabled={disabled}
-              className={cn(
-                "min-h-[56px] max-h-32 resize-none rounded-2xl bg-card shadow-sm pr-12",
-                "focus-visible:ring-accent focus-visible:ring-2 transition-all",
-                "placeholder:text-muted-foreground/60",
-                isOverLimit && "ring-2 ring-destructive focus-visible:ring-destructive"
-              )}
-              rows={1}
-            />
-            {input.length > 0 && (
-              <div className="absolute right-3 bottom-3 flex items-center gap-2">
-                {isNearLimit && (
-                  <span className={cn(
-                    "text-xs font-medium tabular-nums",
-                    isOverLimit ? "text-destructive" : "text-muted-foreground"
-                  )}>
-                    {input.length}/{maxLength}
-                  </span>
-                )}
-              </div>
+    <div className="p-4 bg-transparent">
+      <form 
+        onSubmit={handleSubmit}
+        className="mx-auto max-w-3xl relative"
+      >
+        <div className="relative flex items-end gap-2 p-2 rounded-3xl border bg-background shadow-lg ring-1 ring-black/5 focus-within:ring-accent/30 transition-all">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Message NeuraDesk..."
+            disabled={disabled}
+            className={cn(
+              "min-h-[44px] max-h-32 w-full resize-none border-0 bg-transparent shadow-none focus-visible:ring-0",
+              "py-3 px-4 placeholder:text-muted-foreground/60",
+              "scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent"
             )}
-          </div>
+            rows={1}
+            style={{ height: 'auto', overflow: 'hidden' }}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = 'auto';
+              target.style.height = `${Math.min(target.scrollHeight, 128)}px`;
+              target.style.overflow = target.scrollHeight > 128 ? 'auto' : 'hidden';
+            }}
+          />
           
           <Button
             type="submit"
             disabled={!input.trim() || disabled || isOverLimit}
             size="icon"
             className={cn(
-              "h-[56px] w-[56px] shrink-0 rounded-2xl shadow-md transition-all",
-              "bg-gradient-to-br from-accent to-accent/90 hover:from-accent hover:to-accent",
-              "hover:shadow-lg hover:scale-105",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              "h-10 w-10 shrink-0 rounded-full mb-1 mr-1 transition-all",
+              input.trim() 
+                ? "bg-accent text-accent-foreground hover:bg-accent/90" 
+                : "bg-muted text-muted-foreground hover:bg-muted/80",
             )}
           >
             <Send className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Helper Text */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-accent" />
-            <span>AI-powered suggestions enabled</span>
+        {/* Helper Text / Counter */}
+        <div className="mt-2 flex items-center justify-between px-4 text-xs text-muted-foreground/60">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-3 w-3" />
+            <span>AI enabled</span>
           </div>
-          <span className="text-muted-foreground/70 hidden sm:block">
-            Press Enter to send
-          </span>
+          {isNearLimit && (
+            <span className={cn(
+              "tabular-nums transition-colors",
+              isOverLimit && "text-destructive font-medium"
+            )}>
+              {input.length}/{maxLength}
+            </span>
+          )}
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };

@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -16,25 +15,7 @@ interface Message {
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  // TODO: Check authentication status on mount
-  useEffect(() => {
-    // Example:
-    // const checkAuth = async () => {
-    //   const { data: { session } } = await supabase.auth.getSession();
-    //   setIsAuthenticated(!!session);
-    //   if (!session) {
-    //     navigate("/");
-    //   }
-    // };
-    // checkAuth();
-
-    // Placeholder - set to true to test authenticated UI
-    setIsAuthenticated(false);
-  }, [navigate]);
 
   const handleSendMessage = async (text: string) => {
     const userMessage: Message = {
@@ -91,18 +72,9 @@ What else would you like to know?`,
     });
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setMessages([]);
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out",
-    });
-  };
-
   return (
     <div className="flex h-screen flex-col">
-      <Navigation isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+      <Navigation />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar onSelectConversation={handleSelectConversation} />
         <main className="flex flex-1 flex-col overflow-hidden">
