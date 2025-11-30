@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 96%;
+    --foreground: 210 32% 17%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 32% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 32% 17%;
+
+    --primary: 210 32% 17%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 184 65% 54%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 88%;
+    --muted-foreground: 210 20% 45%;
+
+    --accent: 184 65% 54%;
+    --accent-foreground: 210 32% 17%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 92%;
+    --ring: 184 65% 54%;
+
+    --radius: 0.75rem;
+    
+    /* Custom NeuraDesk colors */
+    --navy: 210 32% 17%;
+    --teal: 184 65% 54%;
+    --teal-light: 184 65% 94%;
+    --gray-bg: 0 0% 96%;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    
+    /* Transitions */
+    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 210 32% 12%;
+    --foreground: 0 0% 98%;
+
+    --card: 210 32% 17%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 210 32% 17%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 184 65% 54%;
+    --primary-foreground: 210 32% 17%;
+
+    --secondary: 210 32% 22%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 210 32% 22%;
+    --muted-foreground: 210 20% 65%;
+
+    --accent: 184 65% 54%;
+    --accent-foreground: 210 32% 17%;
+
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 32% 22%;
+    --input: 210 32% 22%;
+    --ring: 184 65% 54%;
+    
+    --sidebar-background: 210 32% 15%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 184 65% 54%;
+    --sidebar-primary-foreground: 210 32% 17%;
+    --sidebar-accent: 210 32% 20%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 210 32% 22%;
+    --sidebar-ring: 184 65% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .chat-bubble-enter {
+    animation: bubble-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .typing-dot {
+    animation: typing 1.4s infinite;
+  }
+  
+  .typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  .typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
