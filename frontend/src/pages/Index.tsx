@@ -5,6 +5,8 @@ import { ChatArea } from "@/components/chat/ChatArea";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { useToast } from "@/hooks/use-toast";
 import { api } from "@/api";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Message {
   id: string;
@@ -14,6 +16,7 @@ interface Message {
 }
 
 const Index = () => {
+  const { session, signOut } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
@@ -32,6 +35,7 @@ const Index = () => {
     // Call the actual backend API
     try {
       const response = await api.askLLM({
+        user_id: session?.user.id,
         question: text,
         context: "", // Context can be added here later if needed
       });

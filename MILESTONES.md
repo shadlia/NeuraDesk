@@ -1,12 +1,12 @@
 # NeuraDesk - Development Milestones
 
 **Project Started:** November 2025  
-**Current Phase:** Phase 1 - LLM API Base (In Progress)  
-**Last Updated:** November 28, 2025
+**Current Phase:** Phase 2 - Memory & Context (Active)  
+**Last Updated:** December 1, 2025
 
 ---
 
-## Phase 1: LLM API Base ⏳ IN PROGRESS
+## Phase 1: LLM API Base ✅ COMPLETED
 
 **Goal:** Create a functional FastAPI backend that can answer questions using Gemini LLM with proper monitoring and observability.
 
@@ -34,10 +34,6 @@
 - [x] Create `LangfuseConfig` wrapper class
 - [x] Add metadata handling for sessions
 - **Completed:** November 28, 2025
-- **Key Challenges:** 
-  - Migrated from deprecated `langfuse.callback` to `langfuse.langchain`
-  - Updated CallbackHandler to SDK v3 API (removed unsupported parameters)
-  - Added missing dependencies: `langchain`, `langchain-google-genai`
 
 ### Milestone 1.4: Testing & Validation ⏳ IN PROGRESS
 - [ ] Create test suite for `/llm/ask` endpoint
@@ -47,20 +43,20 @@
 - [ ] Load testing for response times
 - **Target:** December 2025
 
-### Milestone 1.5: Frontend Interface 📋 TODO
-- [ ] Create simple React/Next.js frontend
-- [ ] Build chat interface for LLM interaction
-- [ ] Add input validation and loading states
-- [ ] Display conversation history
-- [ ] Connect to `/llm/ask` backend endpoint
-- **Target:** December 2025
+### Milestone 1.5: Frontend Interface ✅ COMPLETED
+- [x] Create simple React/Next.js frontend
+- [x] Build chat interface for LLM interaction
+- [x] Add input validation and loading states
+- [x] Display conversation history
+- [x] Connect to `/llm/ask` backend endpoint
+- **Completed:** December 1, 2025
 
-### Milestone 1.6: Session Management 📋 TODO
+### Milestone 1.6: Session Management ⏳ IN PROGRESS
 - [ ] Implement conversation history storage
 - [ ] Add session ID generation and tracking
 - [ ] Enable multi-turn conversations
 - [ ] Add context window management
-- [ ] Store conversations in database (SQLite/PostgreSQL)
+- [x] Store conversations in database (Supabase)
 - **Target:** December 2025
 
 ### Milestone 1.7: Streaming Responses 📋 TODO
@@ -72,7 +68,40 @@
 
 ---
 
-## Phase 2: Document Ingestion & RAG 📋 PLANNED
+## Phase 2: Memory & Context ⏳ IN PROGRESS
+
+**Goal:** Enable the assistant to "remember" the user, their preferences, and past interactions.
+
+### Milestone 2.1: Memory System Foundation ✅ COMPLETED
+- [x] Design Memory Architecture (Classifier, Manager, Store)
+- [x] Implement LLM-based Fact Classifier
+- [x] Create Pydantic models for Memory Facts
+- [x] Integrate Structured Output for reliable classification
+- **Completed:** December 1, 2025
+
+### Milestone 2.2: Structured Memory Storage ✅ COMPLETED
+- [x] Set up Supabase database
+- [x] Design `user_memories` schema with RLS
+- [x] Implement `StructuredStore` for CRUD operations
+- [x] Connect Memory Manager to Supabase
+- **Completed:** December 1, 2025
+
+### Milestone 2.3: Context Injection ✅ COMPLETED
+- [x] Retrieve relevant memories based on query
+- [x] Inject memories into LLM context window
+- [x] Update `/llm/ask` endpoint to use memory
+- **Completed:** December 1, 2025
+
+### Milestone 2.4: Semantic Memory (Vector Store) 📋 PLANNED
+- [ ] Generate embeddings for memories
+- [ ] Store embeddings in Supabase (pgvector)
+- [ ] Implement semantic search for retrieval
+- [ ] Hybrid search (Keyword + Semantic)
+- **Target:** December 2025
+
+---
+
+## Phase 3: Document Ingestion & RAG 📋 PLANNED
 
 **Goal:** Enable the assistant to ingest documents (PDF, HTML) and answer questions using RAG (Retrieval-Augmented Generation).
 
@@ -109,25 +138,25 @@
 
 ---
 
-## Phase 3: Multimodal Support 📋 PLANNED
+## Phase 4: Multimodal Support 📋 PLANNED
 
 **Goal:** Extend capabilities to handle images, screenshots, audio, and video.
 
-### Milestone 3.1: Image Processing
+### Milestone 4.1: Image Processing
 - [ ] Integrate Gemini Vision API
 - [ ] Add image upload endpoint
 - [ ] Implement OCR for text extraction
 - [ ] Support image + text questions
 - **Target:** April 2026
 
-### Milestone 3.2: Audio Processing
+### Milestone 4.2: Audio Processing
 - [ ] Integrate Whisper for transcription
 - [ ] Add audio upload and processing
 - [ ] Implement text-to-speech (XTTS)
 - [ ] Support audio-based queries
 - **Target:** April-May 2026
 
-### Milestone 3.3: Video Processing
+### Milestone 4.3: Video Processing
 - [ ] Add video frame extraction
 - [ ] Implement video transcription
 - [ ] Combine visual + audio understanding
@@ -136,25 +165,25 @@
 
 ---
 
-## Phase 4: Agents & Automation 📋 PLANNED
+## Phase 5: Agents & Automation 📋 PLANNED
 
 **Goal:** Enable AI to perform tasks autonomously (web scraping, form filling, email sending, etc.)
 
-### Milestone 4.1: Tool Integration
+### Milestone 5.1: Tool Integration
 - [ ] Implement LangChain tool calling
 - [ ] Create web scraping tools (Playwright/Selenium)
 - [ ] Add email sending capabilities
 - [ ] Build calendar/reminder tools
 - **Target:** June 2026
 
-### Milestone 4.2: Multi-Step Reasoning
+### Milestone 5.2: Multi-Step Reasoning
 - [ ] Implement agent workflow (ReAct/Plan-Execute)
 - [ ] Add memory and state management
 - [ ] Create task decomposition logic
 - [ ] Test complex multi-step tasks
 - **Target:** June-July 2026
 
-### Milestone 4.3: Automation Workflows
+### Milestone 5.3: Automation Workflows
 - [ ] Build workflow editor UI
 - [ ] Create automation templates
 - [ ] Schedule recurring tasks
@@ -163,25 +192,25 @@
 
 ---
 
-## Phase 5: Fine-Tuning 📋 PLANNED
+## Phase 6: Fine-Tuning 📋 PLANNED
 
 **Goal:** Fine-tune the model on personal/domain-specific data for improved accuracy.
 
-### Milestone 5.1: Data Collection & Preparation
+### Milestone 6.1: Data Collection & Preparation
 - [ ] Collect personal/domain data
 - [ ] Create fine-tuning dataset (Q&A pairs)
 - [ ] Clean and validate data
 - [ ] Split train/validation sets
 - **Target:** August 2026
 
-### Milestone 5.2: Model Fine-Tuning
+### Milestone 6.2: Model Fine-Tuning
 - [ ] Choose base model (Gemini/Llama/Mistral)
 - [ ] Set up fine-tuning pipeline (LoRA/QLoRA)
 - [ ] Train and evaluate model
 - [ ] Compare performance vs. base model
 - **Target:** August-September 2026
 
-### Milestone 5.3: Model Deployment
+### Milestone 6.3: Model Deployment
 - [ ] Deploy fine-tuned model
 - [ ] Create model versioning system
 - [ ] A/B test base vs. fine-tuned model
@@ -190,17 +219,17 @@
 
 ---
 
-## Phase 6: Deployment 📋 PLANNED
+## Phase 7: Deployment 📋 PLANNED
 
 **Goal:** Deploy the assistant for production use with web interface and API access.
 
-### Milestone 6.1: Containerization
+### Milestone 7.1: Containerization
 - [ ] Create Dockerfile for backend
 - [ ] Set up Docker Compose for full stack
 - [ ] Test local Docker deployment
 - **Target:** October 2026
 
-### Milestone 6.2: Cloud Deployment
+### Milestone 7.2: Cloud Deployment
 - [ ] Choose platform (Vercel/Railway/GCP)
 - [ ] Set up CI/CD pipeline
 - [ ] Deploy backend API
@@ -208,7 +237,7 @@
 - [ ] Configure domain and SSL
 - **Target:** October 2026
 
-### Milestone 6.3: Production Hardening
+### Milestone 7.3: Production Hardening
 - [ ] Add authentication (OAuth/JWT)
 - [ ] Implement rate limiting
 - [ ] Set up logging and monitoring
@@ -217,25 +246,25 @@
 
 ---
 
-## Phase 7: Scaling & Monitoring 📋 PLANNED
+## Phase 8: Scaling & Monitoring 📋 PLANNED
 
 **Goal:** Optimize for multi-user production use with performance monitoring.
 
-### Milestone 7.1: Performance Optimization
+### Milestone 8.1: Performance Optimization
 - [ ] Implement async pipelines
 - [ ] Add Redis caching
 - [ ] Set up task queues (Celery)
 - [ ] Optimize database queries
 - **Target:** November-December 2026
 
-### Milestone 7.2: Monitoring & Analytics
+### Milestone 8.2: Monitoring & Analytics
 - [ ] Set up Prometheus metrics
 - [ ] Create Grafana dashboards
 - [ ] Track user analytics
 - [ ] Monitor LLM costs
 - **Target:** December 2026
 
-### Milestone 7.3: Multi-User Support
+### Milestone 8.3: Multi-User Support
 - [ ] Implement user authentication
 - [ ] Add user data isolation
 - [ ] Create admin dashboard
@@ -269,36 +298,42 @@
 
 ## Success Metrics
 
-### Phase 1 (Current)
+### Phase 1 (Completed)
 - ✅ Backend API running successfully
 - ✅ LLM responding to questions
 - ✅ Langfuse tracking working
-- ⏳ Frontend interface functional
+- ✅ Frontend interface functional
 - ⏳ Session management implemented
 
-### Phase 2
+### Phase 2 (Active)
+- ✅ Memory classifier working
+- ✅ Structured storage implemented
+- ✅ Context injection functional
+- ⏳ Vector memory retrieval working
+
+### Phase 3
 - Documents ingested successfully
 - RAG retrieval accuracy > 80%
 - Response relevance improved vs. Phase 1
 
-### Phase 3
+### Phase 4
 - Multimodal inputs supported
 - Image/audio understanding accurate
 
-### Phase 4  
+### Phase 5  
 - Automated tasks completing successfully
 - Agent reasoning quality validated
 
-### Phase 5
+### Phase 6
 - Fine-tuned model performance > base model
 - Domain-specific accuracy increased
 
-### Phase 6
+### Phase 7
 - Live deployment accessible
 - API uptime > 99%
 - User authentication working
 
-### Phase 7
+### Phase 8
 - Multi-user support functional
 - Performance optimized
 - Monitoring dashboards active

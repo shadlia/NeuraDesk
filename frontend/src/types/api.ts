@@ -1,4 +1,5 @@
 export interface LLMRequest {
+  user_id: string;
   question: string;
   context: string;
 }

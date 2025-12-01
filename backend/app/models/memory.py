@@ -19,7 +19,7 @@ class MemoryFact(BaseModel):
     id: Optional[str] = None
     user_id: str
     category: MemoryType
-    importance: int
+    importance: float
     key: str  # e.g., "name", "favorite_language", "project_alpha_id"
     value: str  # The actual fact
     context: Optional[str] = None  # Additional context
@@ -37,7 +37,7 @@ class MemoryQuery(BaseModel):
 class MemoryClassificationResult(BaseModel):
     """Result from the classifier"""
     category: str
-    importance: int
+    importance: float
     key: str
     value: str
     should_store: bool
