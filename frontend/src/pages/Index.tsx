@@ -4,6 +4,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { useToast } from "@/hooks/use-toast";
+import { api } from "@/api";
 
 interface Message {
   id: string;
@@ -28,39 +29,29 @@ const Index = () => {
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate API call - Replace with actual backend call
+    // Call the actual backend API
     try {
-      // Placeholder for API call: POST to /ask endpoint
-      // const response = await fetch('/api/ask', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ question: text, context: [] })
-      // });
-      // const data = await response.json();
+      const response = await api.askLLM({
+        question: text,
+        context: "", // Context can be added here later if needed
+      });
 
-      // Simulated AI response
-      setTimeout(() => {
-        const aiMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: `I understand you're asking about "${text}". As your AI knowledge assistant, I'm here to help! 
-
-This is a placeholder response. In the full implementation, I'll provide detailed, context-aware answers by processing your question through our AI backend.
-
-What else would you like to know?`,
-          isUser: false,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        
-        setMessages((prev) => [...prev, aiMessage]);
-        setIsTyping(false);
-      }, 1500);
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response.answer,
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: "Failed to get response from AI. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsTyping(false);
     }
   };

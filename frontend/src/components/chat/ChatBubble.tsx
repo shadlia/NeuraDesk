@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Brain, User } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface ChatBubbleProps {
   message: string;
@@ -42,7 +44,14 @@ export const ChatBubble = ({ message, isUser, timestamp }: ChatBubbleProps) => {
               : "bg-card border rounded-tl-sm"
           )}
         >
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message}</p>
+          <div className={cn(
+            "prose prose-sm max-w-none break-words",
+            isUser ? "prose-invert text-primary-foreground" : "dark:prose-invert"
+          )}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {message}
+            </ReactMarkdown>
+          </div>
         </div>
         {timestamp && (
           <span className="text-xs text-muted-foreground px-2">{timestamp}</span>
