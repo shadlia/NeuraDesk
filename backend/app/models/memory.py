@@ -1,0 +1,49 @@
+from pydantic import BaseModel
+from enum import Enum
+from typing import Optional
+from datetime import datetime
+
+
+class MemoryType(str, Enum):
+    """Classification of memory facts"""
+    PERSONAL = "personal"  # Name, age, location, job title
+    PREFERENCE = "preference"  # Likes, dislikes, habits
+    PROJECT = "project"  # Project names, IDs, goals
+    EPHEMERAL = "ephemeral"  # Temporary context (not stored long-term)
+
+
+class MemoryImportance(str, Enum):
+    """Importance level for prioritization"""
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+class MemoryFact(BaseModel):
+    """Represents a single memory fact"""
+    id: Optional[str] = None
+    user_id: str
+    fact_type: MemoryType
+    importance: MemoryImportance
+    key: str  # e.g., "name", "favorite_language", "project_alpha_id"
+    value: str  # The actual fact
+    context: Optional[str] = None  # Additional context
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class MemoryQuery(BaseModel):
+    """Query to retrieve relevant memories"""
+    user_id: str
+    query: str
+    limit: int = 5
+
+
+class MemoryClassificationResult(BaseModel):
+    """Result from the classifier"""
+    fact_type: MemoryType
+    importance: MemoryImportance
+    key: str
+    value: str
+    should_store: bool
+    reasoning: Optional[str] = None

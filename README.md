@@ -7,12 +7,14 @@
 
 ## Project Overview
 **Goal:** Build a personal AI assistant that helps users:  
+- **Remember everything:** Smart memory for user facts, preferences, and conversation history
 - Organize knowledge from documents, notes, websites, images, and emails  
 - Search and summarize information efficiently  
 - Automate repetitive tasks (web forms, reminders, data extraction)  
 - Gradually evolve into a multimodal, fine-tuned, deployed agent
 
 **Key Features:**  
+- **Smart Context:** Long-term memory and user awareness
 - Multi-format ingestion (PDF, HTML, images, video, audio)  
 - RAG (Retrieval-Augmented Generation) for searching knowledge  
 - Agents that perform tasks using tools and automation  
@@ -44,17 +46,24 @@
   - Protected routes (`/dashboard`, `/chat`)
   - Custom email templates for verification
   - Resend verification code functionality
+  - **Enhanced UI:** Vibrant background animations (particles, floating blobs)
+  - **Smart Redirects:** Auto-redirect logged-in users to dashboard
+- [x] **Backend Integration:**
+  - Centralized API architecture (`src/api`)
+  - Connected Chat UI to `/llm/ask` endpoint
+  - Configured CORS for frontend communication
+  - Markdown rendering for rich chat responses
 
 ### 🔄 In Progress
-- [ ] **Backend Integration:** Connecting Frontend to `/llm/ask` endpoint
 - [ ] Testing and API validation
 - [ ] Error handling and edge cases
+- [ ] Session management , conversation history and smart memory
 
 ### 📋 Phase 1 Next Steps
 1. Build simple frontend UI to test LLM endpoint
-2. Add conversation history/session management
+2. Add conversation history/session management and smart memory to each user
 3. Implement streaming responses
-4. Complete Phase 1 before moving to Phase 2 (RAG)
+4. Complete Phase 1 before moving to Phase 2 (Memory & Context)
 
 > 📊 **See [MILESTONES.md](./MILESTONES.md) for detailed progress tracking with granular task breakdown and timeline estimates.**
 
@@ -64,13 +73,14 @@
 
 | Phase | TODO / Description | Skills / Concepts | Tools / Tech | Expected Output |
 |-------|-----------------|-----------------|---------------|----------------|
-| **1. LLM API Base** | ✅ **IN PROGRESS** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
-| **2. Document Ingestion / RAG** | TODO: Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Chroma / Pinecone, OpenAI / BGE embeddings | Ask questions → AI answers using documents |
-| **3. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
-| **4. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
-| **5. Fine-Tuning** | TODO: Fine-tune model on personal / domain-specific data | LoRA, QLoRA, SFT | HuggingFace TRL, LoRA adapters | AI answers more accurately for personal workflow or specialized domain |
-| **6. Deployment** | TODO: Make the assistant accessible via web / API | FastAPI, Docker, Redis, async pipelines | Vercel / Railway / GCP | Live personal assistant available via web + API |
-| **7. Scaling & Monitoring** | TODO: Optimize for performance, multi-user, logging, error handling | Async pipelines, Redis queues, monitoring | Celery, Redis, Prometheus, Grafana | Production-ready system with dashboard & analytics |
+| **1. Setup and LLM API Base** | ✅ **Done** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
+| **2. Memory & Context** | ✅ **In Progress** - Conversation history, "Smart Memory" (user preferences, facts), Session management | Vector stores (long-term), Redis (short-term), User profiling | Supabase (pgvector), Redis, LangChain Memory | AI remembers you, your past chats, and preferences |
+| **3. Document Ingestion / RAG** | TODO: Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Chroma / Pinecone, OpenAI / BGE embeddings | Ask questions → AI answers using documents |
+| **4. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
+| **5. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
+| **6. Fine-Tuning** | TODO: Fine-tune model on personal / domain-specific data | LoRA, QLoRA, SFT | HuggingFace TRL, LoRA adapters | AI answers more accurately for personal workflow or specialized domain |
+| **7. Deployment** | TODO: Make the assistant accessible via web / API | FastAPI, Docker, Redis, async pipelines | Vercel / Railway / GCP | Live personal assistant available via web + API |
+| **8. Scaling & Monitoring** | TODO: Optimize for performance, multi-user, logging, error handling | Async pipelines, Redis queues, monitoring | Celery, Redis, Prometheus, Grafana | Production-ready system with dashboard & analytics |
 
 ---
 
@@ -108,6 +118,7 @@ NeuraDesk/
 │   └── venv/                         # Virtual environment
 ├── frontend/
 │   ├── src/
+│   │   ├── api/               # API client and requests
 │   │   ├── components/        # UI components (Chat, Dashboard, Layout)
 │   │   ├── pages/             # Route pages (Home, Dashboard, Chat)
 │   │   └── lib/               # Utilities
@@ -129,12 +140,13 @@ NeuraDesk/
 ## Project Deliverables (TODO)
 
 - Phase 1: Working LLM answering questions from text  
-- Phase 2: RAG-powered knowledge retrieval  
-- Phase 3: Multimodal support (images + audio)  
-- Phase 4: Automation agent capable of tasks  
-- Phase 5: Fine-tuned personalized AI  
-- Phase 6: Deployed web + API assistant  
-- Phase 7: Production-ready scaling + monitoring  
+- Phase 2: **Smart Memory & Context Awareness** (History, User Facts)
+- Phase 3: RAG-powered knowledge retrieval  
+- Phase 4: Multimodal support (images + audio)  
+- Phase 5: Automation agent capable of tasks  
+- Phase 6: Fine-tuned personalized AI  
+- Phase 7: Deployed web + API assistant  
+- Phase 8: Production-ready scaling + monitoring  
 
 ---
 
