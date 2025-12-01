@@ -1,5 +1,5 @@
-from app.models.memory import MemoryClassificationResult, MemoryType, MemoryImportance
-from app.services.llm_service import classify_fact
+from app.models.memory import MemoryClassificationResult, MemoryType
+from app.services.llm_service import classify_fact_structured
 import json
 
 class MemoryClassifier:
@@ -25,37 +25,35 @@ class MemoryClassifier:
         Returns:
             Classification result with type, importance, and storage decision
         """
-        response = classify_fact(user_message)
-        print(response)
+        response = classify_fact_structured(user_message)
         try:
-            result_dict = json.loads(response)
             
-            if not result_dict.get("should_store", False):
+            if not response.should_store:
                 return MemoryClassificationResult(
-                    fact_type=MemoryType.EPHEMERAL,
-                    importance=MemoryImportance.LOW,
+                    category="ephemeral",
+                    importance=0,
                     key="",
                     value="",
                     should_store=False,
-                    reasoning=result_dict.get("reasoning", "No facts to store")
+                    reason=response.reason
                 )
             
             return MemoryClassificationResult(
-                fact_type=MemoryType(result_dict["fact_type"]),
-                importance=MemoryImportance(result_dict["importance"]),
-                key=result_dict["key"],
-                value=result_dict["value"],
+                category=response.category,
+                importance=response.importance,
+                key=response.key,
+                value=response.value,
                 should_store=True,
-                reasoning=result_dict.get("reasoning")
+                reason=response.reason
             )
         
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             # If parsing fails, don't store
             return MemoryClassificationResult(
-                fact_type=MemoryType.EPHEMERAL,
-                importance=MemoryImportance.LOW,
+                category="ephemeral",
+                importance=0,
                 key="",
                 value="",
                 should_store=False,
-                reasoning=f"Classification failed: {str(e)}"
+                reason=f"Classification failed: {str(e)}"
             )

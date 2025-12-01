@@ -12,19 +12,14 @@ class MemoryType(str, Enum):
     EPHEMERAL = "ephemeral"  # Temporary context (not stored long-term)
 
 
-class MemoryImportance(str, Enum):
-    """Importance level for prioritization"""
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
 
 
 class MemoryFact(BaseModel):
     """Represents a single memory fact"""
     id: Optional[str] = None
     user_id: str
-    fact_type: MemoryType
-    importance: MemoryImportance
+    category: MemoryType
+    importance: int
     key: str  # e.g., "name", "favorite_language", "project_alpha_id"
     value: str  # The actual fact
     context: Optional[str] = None  # Additional context
@@ -41,9 +36,9 @@ class MemoryQuery(BaseModel):
 
 class MemoryClassificationResult(BaseModel):
     """Result from the classifier"""
-    fact_type: MemoryType
-    importance: MemoryImportance
+    category: str
+    importance: int
     key: str
     value: str
     should_store: bool
-    reasoning: Optional[str] = None
+    reason: Optional[str] = None

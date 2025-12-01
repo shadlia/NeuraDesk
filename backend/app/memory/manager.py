@@ -1,7 +1,7 @@
 from app.memory.structured_store import StructuredStore
 from app.memory.vector_store import VectorStore
 from app.memory.classifier import MemoryClassifier
-from app.models.memory import MemoryFact, MemoryType, MemoryImportance
+from app.models.memory import MemoryFact, MemoryType
 from typing import List, Optional
 
 
@@ -16,12 +16,10 @@ class MemoryManager:
         self.vector_store = VectorStore()
         self.classifier = MemoryClassifier()
     
-    async def process_conversation(
+    async def process_query(
         self, 
         user_id: str,
         user_message: str,
-        ai_response: str,
-        context: str = ""
     ) -> Optional[MemoryFact]:
         """
         Process a conversation turn to extract and store memories.
@@ -29,29 +27,26 @@ class MemoryManager:
         This is called after each AI response to check if anything should be remembered.
         """
         
-        # 1. Classify the conversation
+        # 1. Classify the user message
         classification = await self.classifier.classify_fact(
-            user_message=user_message,
-            ai_response=ai_response,
-            context=context
+            user_message=user_message
         )
-        
         # 2. If nothing to store, return early
         if not classification.should_store:
             return None
-        
         # 3. Create memory fact
         fact = MemoryFact(
             user_id=user_id,
-            fact_type=classification.fact_type,
+            category=classification.category,
             importance=classification.importance,
             key=classification.key,
             value=classification.value,
-            context=context
+            context=f"Q: {user_message}\nA:"
         )
+       
         
         # 4. Store in structured DB (always for non-ephemeral)
-        if classification.fact_type != MemoryType.EPHEMERAL:
+        if classification.category != MemoryType.EPHEMERAL:
             fact = await self.structured_store.store_fact(fact)
         
         # 5. TODO: Store in vector store for semantic search

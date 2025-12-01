@@ -1,7 +1,6 @@
 from typing import List, Optional
 from app.models.memory import MemoryFact, MemoryType
-import os
-from supabase import create_client, Client
+from app.services.supabase_service import supabase_service
 
 
 class StructuredStore:
@@ -11,28 +10,21 @@ class StructuredStore:
     """
     
     def __init__(self):
-        supabase_url = os.getenv("SUPABASE_URL")
-        supabase_key = os.getenv("SUPABASE_SERVICE_KEY")
-        
-        if not supabase_url or not supabase_key:
-            raise ValueError("Supabase credentials not found in environment")
-        
-        self.client: Client = create_client(supabase_url, supabase_key)
+        self.client = supabase_service.client
         self.table_name = "user_memories"
     
     async def store_fact(self, fact: MemoryFact) -> MemoryFact:
         """Store a structured fact in the database"""
         data = {
             "user_id": fact.user_id,
-            "fact_type": fact.fact_type.value,
-            "importance": fact.importance.value,
+            "category": fact.category.value,
+            "importance": fact.importance,
             "key": fact.key,
             "value": fact.value,
             "context": fact.context
         }
         
         result = self.client.table(self.table_name).insert(data).execute()
-        
         if result.data:
             stored_fact = result.data[0]
             fact.id = stored_fact["id"]
@@ -44,14 +36,14 @@ class StructuredStore:
     async def get_facts(
         self, 
         user_id: str, 
-        fact_type: Optional[MemoryType] = None,
+        category: Optional[MemoryType] = None,
         limit: int = 50
     ) -> List[MemoryFact]:
         """Retrieve facts for a user, optionally filtered by type"""
         query = self.client.table(self.table_name).select("*").eq("user_id", user_id)
         
-        if fact_type:
-            query = query.eq("fact_type", fact_type.value)
+        if category:
+            query = query.eq("category", category.value)
         
         result = query.limit(limit).execute()
         
@@ -60,7 +52,7 @@ class StructuredStore:
             facts.append(MemoryFact(
                 id=row["id"],
                 user_id=row["user_id"],
-                fact_type=MemoryType(row["fact_type"]),
+                category=MemoryType(row["category"]),
                 importance=row["importance"],
                 key=row["key"],
                 value=row["value"],
@@ -84,7 +76,7 @@ class StructuredStore:
             return MemoryFact(
                 id=row["id"],
                 user_id=row["user_id"],
-                fact_type=MemoryType(row["fact_type"]),
+                category=MemoryType(row["category"]),
                 importance=row["importance"],
                 key=row["key"],
                 value=row["value"],

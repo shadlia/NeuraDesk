@@ -2,7 +2,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.langfuse_service import LangfuseConfig
 import os
-from typing import Optional
+import json
+from typing import Optional, Type, TypeVar
+from pydantic import BaseModel
+
+T = TypeVar('T', bound=BaseModel)
 
 
 class LLMService:
@@ -30,10 +34,18 @@ class LLMService:
         self.temperature = temperature
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
         
-    def _create_model(self, name: Optional[str] = None) -> ChatGoogleGenerativeAI:
+    def _create_model(
+        self, 
+        name: Optional[str] = None,
+        response_format: Optional[dict] = None
+    ) -> ChatGoogleGenerativeAI:
         """
         Create an LLM model instance.
         Currently uses ChatGoogleGenerativeAI, but can be extended for other providers.
+        
+        Args:
+            name: Optional name for the model instance
+            response_format: Optional response format for structured output
         """
         kwargs = {
             "model": self.model_name,
@@ -42,6 +54,8 @@ class LLMService:
         }
         if name:
             kwargs["name"] = name
+        if response_format:
+            kwargs["model_kwargs"] = {"response_mime_type": "application/json"}
         return ChatGoogleGenerativeAI(**kwargs)
     
     def invoke(
@@ -83,9 +97,65 @@ class LLMService:
         )
         
         return response.content
+    
+    def invoke_structured(
+        self,
+        prompt_name: str,
+        user_content: str,
+        session_id: str,
+        response_model: Type[T],
+        model_name_override: Optional[str] = None
+    ) -> T:
+        """
+        Invoke the LLM with structured output using Pydantic schema.
+        
+        Args:
+            prompt_name: Name of the prompt in Langfuse
+            user_content: User's input content
+            session_id: Session ID for Langfuse tracking
+            response_model: Pydantic model class for structured output
+            model_name_override: Optional name for the model instance
+            
+        Returns:
+            Parsed response as Pydantic model instance
+        """
+        # 1. Load prompt from Langfuse
+        langfuse_config = LangfuseConfig(session_id=session_id)
+        prompt_template = langfuse_config.get_prompt(prompt_name).prompt[0]["content"]
+        
+        # 2. Add JSON schema to prompt
+        schema_json = json.dumps(response_model.model_json_schema(), indent=2)
+        enhanced_prompt = f"""{prompt_template}
+
+            You MUST respond with valid JSON matching this exact schema:
+            {schema_json}
+
+            Respond ONLY with the JSON object, no additional text."""
+        
+        # 3. Format messages for LLM
+        messages = [
+            SystemMessage(content=enhanced_prompt),
+            HumanMessage(content=user_content),
+        ]
+        
+        # 4. Create model with JSON response format
+        model = self._create_model(
+            name=model_name_override,
+            response_format={"type": "json_object"}
+        )
+        
+        # 5. Invoke model with Langfuse callbacks
+        response = model.invoke(
+            messages,
+            config={"callbacks": [langfuse_config._initialize_with_langchain()]}
+        )
+        
+        # 6. Parse and validate response
+        response_json = json.loads(response.content)
+        return response_model(**response_json)
 
 
-
+# Singleton instance for reuse
 _llm_service = LLMService()
 
 
@@ -134,5 +204,26 @@ def classify_fact(user_message: str) -> str:
         prompt_name="MemoryFactClassifier",
         user_content=user_content,
         session_id="fact_classifier",
+        model_name_override="fact_classifier"
+    )
+
+
+def classify_fact_structured(user_message: str):
+    """
+    Classify a fact using structured output with Pydantic validation.
+    
+    Args:
+        user_message: User's message containing potential facts
+        
+    Returns:
+        MemoryClassificationSchema instance with validated data
+    """
+    from app.models.classification_schema import MemoryClassificationSchema
+    
+    return _llm_service.invoke_structured(
+        prompt_name="MemoryFactClassifier",
+        user_content=f"User statement: {user_message}",
+        session_id="fact_classifier_structured",
+        response_model=MemoryClassificationSchema,
         model_name_override="fact_classifier"
     )
