@@ -7,12 +7,14 @@
 
 ## Project Overview
 **Goal:** Build a personal AI assistant that helps users:  
+- **Remember everything:** Smart memory for user facts, preferences, and conversation history
 - Organize knowledge from documents, notes, websites, images, and emails  
 - Search and summarize information efficiently  
 - Automate repetitive tasks (web forms, reminders, data extraction)  
 - Gradually evolve into a multimodal, fine-tuned, deployed agent
 
 **Key Features:**  
+- **Smart Context:** Long-term memory and user awareness
 - Multi-format ingestion (PDF, HTML, images, video, audio)  
 - RAG (Retrieval-Augmented Generation) for searching knowledge  
 - Agents that perform tasks using tools and automation  
@@ -23,40 +25,36 @@
 
 ## Current Progress
 
-**Status:** Phase 1 - LLM API Base (In Progress)  
-**Last Updated:** November 28, 2025
+**Status:** Phase 2 - Memory & Context (Active)  
+**Last Updated:** December 1, 2025
 
 ### ✅ Completed Milestones
-- [x] FastAPI backend scaffolding
-- [x] Gemini 2.0 Flash API integration  
-- [x] LangChain integration for LLM orchestration
-- [x] Langfuse observability & monitoring setup
-- [x] Basic `/llm/ask` endpoint with question-answer functionality
-- [x] Environment configuration with `.env` support
-- [x] Request/Response models with Pydantic
-- [x] SDK v3 compatibility fixes for Langfuse
-- [x] **Frontend Foundation:** React + Vite + Tailwind setup
-- [x] **Home Page Redesign:** Modern "Workspace" aesthetic, Hero preview, Blog/Contact sections
-- [x] **User Dashboard:** Interactive dashboard with stats, quick actions, and insights widgets
-- [x] **Navigation & Routing:** Implemented sidebar and top navigation structure
-- [x] **Authentication:** 
-  - Supabase Auth integration with Email OTP
-  - Protected routes (`/dashboard`, `/chat`)
-  - Custom email templates for verification
-  - Resend verification code functionality
+- [x] **Core Backend:** FastAPI + Gemini 2.0 Flash + LangChain
+- [x] **Observability:** Langfuse integration for full trace monitoring
+- [x] **Frontend:** React + Vite + Tailwind + Modern UI/UX
+- [x] **Authentication:** Supabase Auth (Email/OTP) + Protected Routes
+- [x] **Memory Management System:**
+  - [x] **Smart Classifier:** LLM-based classification of user facts (Personal, Preference, Project, Ephemeral)
+  - [x] **Structured Storage:** Supabase (PostgreSQL) storage for long-term facts
+  - [x] **Context Injection:** Auto-retrieval of relevant memories for chat context
+  - [x] **Background Processing:** Non-blocking memory extraction
+- [x] **Database Integration:**
+  - [x] Centralized Supabase service
+  - [x] Row Level Security (RLS) for user privacy
+  - [x] Pydantic models for structured data validation
 
 ### 🔄 In Progress
-- [ ] **Backend Integration:** Connecting Frontend to `/llm/ask` endpoint
-- [ ] Testing and API validation
-- [ ] Error handling and edge cases
+- [ ] Vector Embeddings for semantic search (RAG)
+- [ ] Conversation History tracking
+- [ ] Streaming responses
 
-### 📋 Phase 1 Next Steps
-1. Build simple frontend UI to test LLM endpoint
-2. Add conversation history/session management
-3. Implement streaming responses
-4. Complete Phase 1 before moving to Phase 2 (RAG)
+### 📋 Phase 2 Next Steps
+1. Implement vector storage for semantic memory retrieval
+2. Add conversation history to Supabase
+3. Refine memory importance scoring
+4. Build "Memory Explorer" UI in dashboard
 
-> 📊 **See [MILESTONES.md](./MILESTONES.md) for detailed progress tracking with granular task breakdown and timeline estimates.**
+> 📊 **See [MILESTONES.md](./MILESTONES.md) for detailed progress tracking.**
 
 ---
 
@@ -64,13 +62,14 @@
 
 | Phase | TODO / Description | Skills / Concepts | Tools / Tech | Expected Output |
 |-------|-----------------|-----------------|---------------|----------------|
-| **1. LLM API Base** | ✅ **IN PROGRESS** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
-| **2. Document Ingestion / RAG** | TODO: Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Chroma / Pinecone, OpenAI / BGE embeddings | Ask questions → AI answers using documents |
-| **3. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
-| **4. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
-| **5. Fine-Tuning** | TODO: Fine-tune model on personal / domain-specific data | LoRA, QLoRA, SFT | HuggingFace TRL, LoRA adapters | AI answers more accurately for personal workflow or specialized domain |
-| **6. Deployment** | TODO: Make the assistant accessible via web / API | FastAPI, Docker, Redis, async pipelines | Vercel / Railway / GCP | Live personal assistant available via web + API |
-| **7. Scaling & Monitoring** | TODO: Optimize for performance, multi-user, logging, error handling | Async pipelines, Redis queues, monitoring | Celery, Redis, Prometheus, Grafana | Production-ready system with dashboard & analytics |
+| **1. Setup and LLM API Base** | ✅ **Done** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
+| **2. Memory & Context** | ✅ **In Progress** - Conversation history, "Smart Memory" (user preferences, facts), Session management | Vector stores (long-term), Redis (short-term), User profiling | Supabase (pgvector), Redis, LangChain Memory | AI remembers you, your past chats, and preferences |
+| **3. Document Ingestion / RAG** | TODO: Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Chroma / Pinecone, OpenAI / BGE embeddings | Ask questions → AI answers using documents |
+| **4. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
+| **5. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
+| **6. Fine-Tuning** | TODO: Fine-tune model on personal / domain-specific data | LoRA, QLoRA, SFT | HuggingFace TRL, LoRA adapters | AI answers more accurately for personal workflow or specialized domain |
+| **7. Deployment** | TODO: Make the assistant accessible via web / API | FastAPI, Docker, Redis, async pipelines | Vercel / Railway / GCP | Live personal assistant available via web + API |
+| **8. Scaling & Monitoring** | TODO: Optimize for performance, multi-user, logging, error handling | Async pipelines, Redis queues, monitoring | Celery, Redis, Prometheus, Grafana | Production-ready system with dashboard & analytics |
 
 ---
 
@@ -82,36 +81,76 @@
 - **Automation:** Selenium, Playwright, Python scripts  
 - **Multimodal:** Gemini Vision, OpenCV, Whisper, XTTS  
 - **Fine-tuning:** LoRA, QLoRA, HuggingFace TRL  
-- **Backend / Deployment:** FastAPI, Docker, Redis, Vercel / Railway / GCP  
+- **Backend / Deployment:** FastAPI, Docker, Redis, Vercel / Railway / GCP, **Supabase**
 - **Frontend / Dashboard:** React / Next.js, Streamlit (optional)  
 
 ---
 
-## Current Project Structure
+## Memory Management System
+
+NeuraDesk now features a sophisticated **Memory Management System** that allows the AI to "remember" users over time.
+
+### Architecture
+
+1.  **Classifier (`app/memory/classifier.py`)**:
+    *   Analyzes every user message in the background.
+    *   Uses Gemini with **Structured Output** (JSON Schema) to categorize facts.
+    *   Categories: `Personal Profile`, `Preference`, `Project`, `Ephemeral`.
+    *   Assigns an **Importance Score** (0.0 - 1.0).
+
+2.  **Manager (`app/memory/manager.py`)**:
+    *   Orchestrates the flow: User Query -> Classification -> Storage.
+    *   Decides what to store based on importance and category.
+    *   Retrieves relevant memories to inject into the chat context.
+
+3.  **Structured Store (`app/memory/structured_store.py`)**:
+    *   Persists facts to **Supabase** (`user_memories` table).
+    *   Uses **Row Level Security (RLS)** to ensure users only access their own data.
+
+### Data Flow
+1.  **User asks:** "My name is Sarah and I love Python."
+2.  **LLM Answers:** "Nice to meet you Sarah! Python is great."
+3.  **Background Process:**
+    *   Classifier detects: `Category: Personal`, `Key: name`, `Value: Sarah`, `Importance: 0.9`.
+    *   Manager saves this fact to Supabase.
+4.  **Next Query:** "What's my favorite language?"
+5.  **Context Injection:** Manager retrieves "Sarah loves Python" and feeds it to the LLM.
+6.  **LLM Answers:** "You mentioned you love Python!"
+
+---
+
+## Project Structure
 
 ```
 NeuraDesk/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                    # FastAPI application entry point
+│   │   ├── main.py                    # FastAPI entry point
 │   │   ├── routes/
-│   │   │   └── llm_routes.py         # /llm/ask endpoint
+│   │   │   ├── llm_routes.py         # Chat endpoint with memory integration
+│   │   │   └── memory_routes.py      # (Future) Memory management endpoints
 │   │   ├── services/
-│   │   │   ├── llm_service.py        # Gemini LLM integration
-│   │   │   └── langfuse_service.py   # Langfuse observability
+│   │   │   ├── llm_service.py        # Gemini LLM & Structured Output
+│   │   │   ├── supabase_service.py   # Centralized Supabase client
+│   │   │   └── langfuse_service.py   # Observability
+│   │   ├── memory/
+│   │   │   ├── manager.py            # Memory orchestration
+│   │   │   ├── classifier.py         # Fact classification logic
+│   │   │   ├── structured_store.py   # Supabase storage
+│   │   │   └── vector_store.py       # (Future) Vector storage
 │   │   └── models/
-│   │       └── llm_models.py         # Pydantic request/response models
-│   ├── data/                          # Future: Document storage
-│   ├── notebooks/                     # Future: Experimentation
-│   ├── requirements.txt               # Python dependencies
-│   ├── .env                          # Environment variables (API keys)
-│   └── venv/                         # Virtual environment
+│   │       ├── llm_models.py         # API Request/Response models
+│   │       ├── memory.py             # Memory domain models
+│   │       └── classification_schema.py # JSON Schemas for LLM
+│   ├── prompts/                      # System prompts
+│   ├── requirements.txt
+│   └── .env                          # API Keys & Config
 ├── frontend/
 │   ├── src/
-│   │   ├── components/        # UI components (Chat, Dashboard, Layout)
-│   │   ├── pages/             # Route pages (Home, Dashboard, Chat)
-│   │   └── lib/               # Utilities
-└── README.md                         # Project documentation
+│   │   ├── api/                      # API integration
+│   │   ├── components/               # React components
+│   │   └── pages/                    # Application routes
+└── README.md
 ```
 
 ---
@@ -129,12 +168,13 @@ NeuraDesk/
 ## Project Deliverables (TODO)
 
 - Phase 1: Working LLM answering questions from text  
-- Phase 2: RAG-powered knowledge retrieval  
-- Phase 3: Multimodal support (images + audio)  
-- Phase 4: Automation agent capable of tasks  
-- Phase 5: Fine-tuned personalized AI  
-- Phase 6: Deployed web + API assistant  
-- Phase 7: Production-ready scaling + monitoring  
+- Phase 2: **Smart Memory & Context Awareness** (History, User Facts)
+- Phase 3: RAG-powered knowledge retrieval  
+- Phase 4: Multimodal support (images + audio)  
+- Phase 5: Automation agent capable of tasks  
+- Phase 6: Fine-tuned personalized AI  
+- Phase 7: Deployed web + API assistant  
+- Phase 8: Production-ready scaling + monitoring  
 
 ---
 
@@ -150,23 +190,4 @@ NeuraDesk/
 - Document API changes and breaking updates  
 
 ---
-
-## Authentication Setup
-
-NeuraDesk uses Supabase for authentication. To set this up:
-
-1.  **Supabase Project**: Create a project at [supabase.com](https://supabase.com).
-2.  **Environment Variables**: Add your keys to `frontend/.env`:
-    ```env
-    VITE_SUPABASE_URL=your_project_url
-    VITE_SUPABASE_PUBLISHABLE_KEY=your_anon_key
-    ```
-3.  **Email Template**: 
-    - Go to Authentication -> Email Templates -> Confirm Your Signup.
-    - Use the content from `supabase_email_template.html`.
-    - Ensure the template uses `{{ .Token }}` for the OTP code.
-4.  **Resend Functionality**:
-    - The app supports resending verification codes.
-    - Ensure your Supabase project's SMTP settings are configured correctly for reliable delivery, or use the default Supabase SMTP for testing (rate limits apply).
-
 
