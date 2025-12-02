@@ -159,7 +159,7 @@ class LLMService:
 _llm_service = LLMService()
 
 
-def ask_question(question: str, context: str = "") -> str:
+def ask_question(question: str, context: str = "",facts: str = "") -> str:
     """
     Ask a question to the LLM using LangChain + Langfuse.
     
@@ -176,6 +176,9 @@ def ask_question(question: str, context: str = "") -> str:
 
     Question:
     {question}
+
+    Information about user:
+    {facts}
     """
     
     return _llm_service.invoke(
@@ -208,7 +211,7 @@ def classify_fact(user_message: str) -> str:
     )
 
 
-def classify_fact_structured(user_message: str):
+def classify_fact_structured(user_message: str,old_facts: str):
     """
     Classify a fact using structured output with Pydantic validation.
     
@@ -222,7 +225,7 @@ def classify_fact_structured(user_message: str):
     
     return _llm_service.invoke_structured(
         prompt_name="MemoryFactClassifier",
-        user_content=f"User statement: {user_message}",
+        user_content=f"User statement: {user_message} , User old facts: {old_facts} ",
         session_id="fact_classifier_structured",
         response_model=MemoryClassificationSchema,
         model_name_override="fact_classifier"

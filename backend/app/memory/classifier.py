@@ -15,7 +15,7 @@ class MemoryClassifier:
     def __init__(self):
         pass
     
-    async def classify_fact(self, user_message: str) -> MemoryClassificationResult:
+    async def classify_fact(self, user_message: str,old_facts: str) -> MemoryClassificationResult:
         """
         Analyze a conversation turn to extract and classify facts.
         
@@ -25,7 +25,7 @@ class MemoryClassifier:
         Returns:
             Classification result with type, importance, and storage decision
         """
-        response = classify_fact_structured(user_message)
+        response = classify_fact_structured(user_message,old_facts)
         try:
             
             if not response.should_store:

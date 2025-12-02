@@ -20,6 +20,7 @@ class MemoryManager:
         self, 
         user_id: str,
         user_message: str,
+        old_facts: str
     ) -> Optional[MemoryFact]:
         """
         Process a conversation turn to extract and store memories.
@@ -29,7 +30,8 @@ class MemoryManager:
         
         # 1. Classify the user message
         classification = await self.classifier.classify_fact(
-            user_message=user_message
+            user_message=user_message,
+            old_facts=old_facts
         )
         # 2. If nothing to store, return early
         if not classification.should_store:
@@ -83,17 +85,17 @@ class MemoryManager:
         
         personal_facts = await self.structured_store.get_facts(
             user_id=user_id,
-            fact_type=MemoryType.PERSONAL
+            category=MemoryType.PERSONAL
         )
         
         preferences = await self.structured_store.get_facts(
             user_id=user_id,
-            fact_type=MemoryType.PREFERENCE
+            category=MemoryType.PREFERENCE
         )
         
         projects = await self.structured_store.get_facts(
             user_id=user_id,
-            fact_type=MemoryType.PROJECT
+            category=MemoryType.PROJECT
         )
         
         return {

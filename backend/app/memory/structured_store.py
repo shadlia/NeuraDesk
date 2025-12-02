@@ -1,7 +1,7 @@
 from typing import List, Optional
 from app.models.memory import MemoryFact, MemoryType
 from app.services.supabase_service import supabase_service
-
+from datetime import datetime
 
 class StructuredStore:
     """
@@ -14,7 +14,7 @@ class StructuredStore:
         self.table_name = "user_memories"
     
     async def store_fact(self, fact: MemoryFact) -> MemoryFact:
-        """Store a structured fact in the database"""
+        """Store a structured fact in the database, updating if key exists"""
         data = {
             "user_id": fact.user_id,
             "category": fact.category.value,
@@ -24,7 +24,27 @@ class StructuredStore:
             "context": fact.context
         }
         
-        result = self.client.table(self.table_name).insert(data).execute()
+        # Check if fact exists for this user and key
+        # (Application-level upsert to avoid needing unique constraint immediately)
+        existing = self.client.table(self.table_name)\
+            .select("id")\
+            .eq("user_id", fact.user_id)\
+            .eq("key", fact.key)\
+            .execute()
+            
+        if existing.data:
+            # Update existing
+            fact_id = existing.data[0]["id"]
+            result = self.client.table(self.table_name)\
+                .update({**data, "updated_at": datetime.utcnow().isoformat()})\
+                .eq("id", fact_id)\
+                .execute()
+        else:
+            # Insert new
+            result = self.client.table(self.table_name)\
+                .insert(data)\
+                .execute()
+        
         if result.data:
             stored_fact = result.data[0]
             fact.id = stored_fact["id"]
@@ -53,7 +73,7 @@ class StructuredStore:
                 id=row["id"],
                 user_id=row["user_id"],
                 category=MemoryType(row["category"]),
-                importance=row["importance"],
+                importance=float(row["importance"]),
                 key=row["key"],
                 value=row["value"],
                 context=row.get("context"),
