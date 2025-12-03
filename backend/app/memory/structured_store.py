@@ -25,7 +25,6 @@ class StructuredStore:
         }
         
         # Check if fact exists for this user and key
-        # (Application-level upsert to avoid needing unique constraint immediately)
         existing = self.client.table(self.table_name)\
             .select("id")\
             .eq("user_id", fact.user_id)\
