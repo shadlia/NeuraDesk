@@ -1,6 +1,6 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
-from app.services.langfuse_service import LangfuseConfig
+from app.intergrations.langfuse import LangfuseConfig
 import os
 
 from typing import Optional, Type, TypeVar
