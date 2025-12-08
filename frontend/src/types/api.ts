@@ -1,10 +1,10 @@
 export interface LLMRequest {
   user_id: string;
-  question: string;
+  message: string;
   context: string;
 }
 
 export interface LLMResponse {
-  question: string;
+  message: string;
   answer: string;
 }

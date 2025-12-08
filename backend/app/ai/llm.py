@@ -2,10 +2,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.services.langfuse_service import LangfuseConfig
 import os
-import json
+
 from typing import Optional, Type, TypeVar
 from pydantic import BaseModel
-from app.models.classification_schema import MemoryClassificationSchema
+from app.schemas.classification_schema import MemoryClassificationSchema
 from langchain.agents import create_agent
 from langchain.agents.structured_output import ToolStrategy
 
@@ -106,56 +106,7 @@ class LLMService:
         if structured_output:
             return response["structured_response"]
         return response["messages"][1].content
-    
+
 
 # Singleton instance for reuse
 _llm_service = LLMService()
-
-
-def ask_question(question: str, context: str = "",facts: str = "") -> str:
-    """
-    Ask a question to the LLM using LangChain + Langfuse.
-    
-    Args:
-        question: User's question
-        context: Optional context to provide
-        
-    Returns:
-        AI response as string
-    """
-    user_content = f"""
-    Context:
-    {context}
-
-    Question:
-    {question}
-
-    Information about user:
-    {facts}
-    """
-    
-    return _llm_service.invoke(
-        prompt_name="neura_qa_v1",
-        user_content=user_content,
-        trace_name="qa_session"
-    )
-
-def classify_fact_structured(user_message: str,old_facts: str):
-    """
-    Classify a fact using structured output with Pydantic validation.
-    
-    Args:
-        user_message: User's message containing potential facts
-        
-    Returns:
-        MemoryClassificationSchema instance with validated data
-    """
-    
-    return _llm_service.invoke(
-        prompt_name="MemoryFactClassifier",
-        user_content=f"User statement: {user_message} , User old facts: {old_facts} ",
-        trace_name="fact_classifier",
-        structured_output=MemoryClassificationSchema,
-       
-    )
-

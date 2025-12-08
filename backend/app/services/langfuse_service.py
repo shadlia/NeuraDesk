@@ -2,9 +2,9 @@ from langfuse.langchain import CallbackHandler
 from langfuse import Langfuse
 import os
 from dotenv import load_dotenv
-import json
 
 load_dotenv()
+
 class LangfuseClientSingleton:
     _instance = None
 

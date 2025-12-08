@@ -4,7 +4,7 @@ import { LLMRequest, LLMResponse } from "../types/api";
 export const api = {
   askLLM: async (data: LLMRequest): Promise<LLMResponse> => {
     console.log("askLLM", data);
-    return client<LLMResponse>("/llm/ask", {
+    return client<LLMResponse>("/api/v1/chat", {
       method: "POST",
       body: JSON.stringify(data),
     });

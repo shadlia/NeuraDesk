@@ -36,7 +36,7 @@ const Index = () => {
     try {
       const response = await api.askLLM({
         user_id: session?.user.id,
-        question: text,
+        message: text,
         context: "", // Context can be added here later if needed
       });
 

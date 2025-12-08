@@ -88,7 +88,7 @@
 
 ## Memory Management System
 
-NeuraDesk now features a sophisticated **Memory Management System** that allows the AI to "remember" users over time.
+NeuraDesk features a sophisticated **Memory Management System** that allows the AI to "remember" users over time.
 
 ### Architecture
 
@@ -103,19 +103,57 @@ NeuraDesk now features a sophisticated **Memory Management System** that allows 
     *   Decides what to store based on importance and category.
     *   Retrieves relevant memories to inject into the chat context.
 
-3.  **Structured Store (`app/memory/structured_store.py`)**:
+3.  **Memory Repository (`app/database/repositories/memory.py`)**:
     *   Persists facts to **Supabase** (`user_memories` table).
     *   Uses **Row Level Security (RLS)** to ensure users only access their own data.
+    *   Implements upsert logic to update existing facts.
 
 ### Data Flow
 1.  **User asks:** "My name is Sarah and I love Python."
 2.  **LLM Answers:** "Nice to meet you Sarah! Python is great."
 3.  **Background Process:**
     *   Classifier detects: `Category: Personal`, `Key: name`, `Value: Sarah`, `Importance: 0.9`.
-    *   Manager saves this fact to Supabase.
+    *   Manager delegates to MemoryRepository to save this fact to Supabase.
 4.  **Next Query:** "What's my favorite language?"
-5.  **Context Injection:** Manager retrieves "Sarah loves Python" and feeds it to the LLM.
+5.  **Context Injection:** Manager retrieves "Sarah loves Python" via MemoryRepository and feeds it to the LLM.
 6.  **LLM Answers:** "You mentioned you love Python!"
+
+---
+
+## Architecture & Design Principles
+
+### Why We Refactored
+
+As NeuraDesk evolved from a simple LLM wrapper to a sophisticated memory-aware assistant, the codebase needed to scale accordingly. The refactor implements **clean architecture principles** to ensure:
+
+- **Separation of Concerns**: Each layer has a single, well-defined responsibility
+- **Maintainability**: Easy to locate, understand, and modify code
+- **Testability**: Isolated components can be tested independently
+- **Scalability**: New features can be added without touching existing code
+- **Team Collaboration**: Clear boundaries make parallel development easier
+
+### Architecture Layers
+
+```
+┌─────────────────────────────────────────────────┐
+│              API Layer (Outer)                  │  ← HTTP endpoints, request/response
+├─────────────────────────────────────────────────┤
+│           Services (Business Logic)             │  ← Orchestration, workflows
+├─────────────────────────────────────────────────┤
+│        Memory (Domain Logic)                    │  ← Memory management, classification
+├─────────────────────────────────────────────────┤
+│      Database (Data Access)                     │  ← Repositories, Supabase client
+├─────────────────────────────────────────────────┤
+│         Schemas (Data Models)                   │  ← Pydantic validation models
+└─────────────────────────────────────────────────┘
+```
+
+**Key Principles:**
+- **Outer layers depend on inner layers** (never the reverse)
+- **Database layer knows nothing about business logic**
+- **Memory layer focuses on domain logic, not DB operations**
+- **Services orchestrate between layers**
+- **API layer is thin, delegates to services**
 
 ---
 
@@ -125,33 +163,82 @@ NeuraDesk now features a sophisticated **Memory Management System** that allows 
 NeuraDesk/
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                    # FastAPI entry point
-│   │   ├── routes/
-│   │   │   ├── llm_routes.py         # Chat endpoint with memory integration
-│   │   │   └── memory_routes.py      # (Future) Memory management endpoints
-│   │   ├── services/
-│   │   │   ├── llm_service.py        # Gemini LLM & Structured Output
-│   │   │   ├── supabase_service.py   # Centralized Supabase client
-│   │   │   └── langfuse_service.py   # Observability
-│   │   ├── memory/
-│   │   │   ├── manager.py            # Memory orchestration
-│   │   │   ├── classifier.py         # Fact classification logic
-│   │   │   ├── structured_store.py   # Supabase storage
-│   │   │   └── vector_store.py       # (Future) Vector storage
-│   │   └── models/
-│   │       ├── llm_models.py         # API Request/Response models
-│   │       ├── memory.py             # Memory domain models
-│   │       └── classification_schema.py # JSON Schemas for LLM
-│   ├── prompts/                      # System prompts
+│   │   ├── main.py                    # FastAPI entry point with CORS & routing
+│   │   │
+│   │   ├── api/                       # 🌐 API Layer (Outer)
+│   │   │   ├── deps.py               # Dependency injection
+│   │   │   └── v1/
+│   │   │       └── chat.py           # Chat endpoints (/api/v1/chat, /api/v1/test)
+│   │   │
+│   │   ├── services/                  # 🧠 Business Logic Layer
+│   │   │   ├── chat_service.py       # Chat orchestration & LLM invocation
+│   │   │   └── langfuse_service.py   # Observability & prompt management
+│   │   │
+│   │   ├── memory/                    # 💾 Memory Domain Layer
+│   │   │   ├── manager.py            # Memory orchestration (process, retrieve)
+│   │   │   └── classifier.py         # Fact classification logic
+│   │   │
+│   │   ├── database/                  # 🗄️ Data Access Layer
+│   │   │   ├── client.py             # Supabase client singleton
+│   │   │   └── repositories/
+│   │   │       ├── memory.py         # Memory CRUD operations
+│   │   │       ├── vector.py         # Vector storage (future)
+│   │   │       ├── chats.py          # Chat history operations
+│   │   │       └── messages.py       # Message operations
+│   │   │
+│   │   ├── schemas/                   # 📋 Data Models Layer
+│   │   │   ├── chat_models.py        # ChatRequest, ChatResponse
+│   │   │   ├── memory.py             # MemoryFact, MemoryType, MemoryClassificationResult
+│   │   │   └── classification_schema.py # LLM structured output schemas
+│   │   │
+│   │   └── ai/                        # 🤖 AI/LLM Layer
+│   │       ├── llm.py                # LLMService (Gemini + LangChain)
+│   │       └── chat_engine.py        # AI response & fact classification functions
+│   │
 │   ├── requirements.txt
 │   └── .env                          # API Keys & Config
+│
 ├── frontend/
 │   ├── src/
 │   │   ├── api/                      # API integration
 │   │   ├── components/               # React components
 │   │   └── pages/                    # Application routes
+│   └── package.json
+│
 └── README.md
 ```
+
+### Layer Responsibilities
+
+#### 🌐 **API Layer** (`api/v1/`)
+- Defines HTTP endpoints
+- Validates requests/responses
+- Delegates to services
+- **Does NOT** contain business logic
+
+#### 🧠 **Services Layer** (`services/`)
+- Orchestrates workflows
+- Coordinates between memory, AI, and database
+- Implements business rules
+- **Does NOT** directly access database
+
+#### 💾 **Memory Layer** (`memory/`)
+- Memory classification logic
+- Memory retrieval strategies
+- **Does NOT** know about Supabase or SQL
+
+#### 🗄️ **Database Layer** (`database/`)
+- Single source of truth for data access
+- Repository pattern for each entity
+- Supabase client management
+- **Does NOT** contain business logic
+
+#### 📋 **Schemas Layer** (`schemas/`)
+- Pydantic models for validation
+- Shared data contracts
+- Type safety across layers
+
+---
 
 ---
 
