@@ -2,9 +2,9 @@ from langfuse.langchain import CallbackHandler
 from langfuse import Langfuse
 import os
 from dotenv import load_dotenv
-import json
 
 load_dotenv()
+
 class LangfuseClientSingleton:
     _instance = None
 
@@ -22,9 +22,8 @@ class LangfuseClientSingleton:
 
 
 class LangfuseConfig:
-    def __init__(self, session_id, trace_name=None):
-        self.session_id = session_id
-        self.trace_name = trace_name
+    def __init__(self):
+      
         self.langfuse = LangfuseClientSingleton.get_instance()
 
     def _initialize_with_langchain(self):
@@ -38,22 +37,6 @@ class LangfuseConfig:
             update_trace=True
         )
         return handler
-
-    def get_langchain_config(self):
-        """Get LangChain configuration with Langfuse metadata.
-        
-        Returns a config dict that can be passed to LangChain's invoke/run methods.
-        """
-        metadata = {
-            "langfuse_session_id": self.session_id,
-        }
-        if self.trace_name:
-            metadata["langfuse_trace_name"] = self.trace_name
-            
-        return {
-            "callbacks": [self._initialize_with_langchain()],
-            "metadata": metadata
-        }
 
     def get_prompt(self, prompt_name, label=None,version=None):
         if label and version:

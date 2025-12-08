@@ -1,7 +1,7 @@
-from app.memory.structured_store import StructuredStore
-from app.memory.vector_store import VectorStore
+from app.database.repositories.memory import MemoryRepository
+from app.database.repositories.vector import VectorRepository
 from app.memory.classifier import MemoryClassifier
-from app.models.memory import MemoryFact, MemoryType
+from app.schemas.memory import MemoryFact, MemoryType
 from typing import List, Optional
 
 
@@ -12,8 +12,8 @@ class MemoryManager:
     """
     
     def __init__(self):
-        self.structured_store = StructuredStore()
-        self.vector_store = VectorStore()
+        self.memory_repository = MemoryRepository()
+        self.vector_repository = VectorRepository()
         self.classifier = MemoryClassifier()
     
     async def process_query(
@@ -49,11 +49,11 @@ class MemoryManager:
         
         # 4. Store in structured DB (always for non-ephemeral)
         if classification.category != MemoryType.EPHEMERAL:
-            fact = await self.structured_store.store_fact(fact)
+            fact = await self.memory_repository.store_fact(fact)
         
         # 5. TODO: Store in vector store for semantic search
         # This would involve generating embeddings and storing them
-        # await self.vector_store.store_embedding(...)
+        # await self.vector_repository.store_embedding(...)
         
         return fact
     
@@ -70,7 +70,7 @@ class MemoryManager:
         
         # For now, just get recent structured facts
         # TODO: Add semantic search via vector store
-        facts = await self.structured_store.get_facts(
+        facts = await self.memory_repository.get_facts(
             user_id=user_id,
             limit=limit
         )
@@ -83,17 +83,17 @@ class MemoryManager:
         Useful for context injection.
         """
         
-        personal_facts = await self.structured_store.get_facts(
+        personal_facts = await self.memory_repository.get_facts(
             user_id=user_id,
             category=MemoryType.PERSONAL
         )
         
-        preferences = await self.structured_store.get_facts(
+        preferences = await self.memory_repository.get_facts(
             user_id=user_id,
             category=MemoryType.PREFERENCE
         )
         
-        projects = await self.structured_store.get_facts(
+        projects = await self.memory_repository.get_facts(
             user_id=user_id,
             category=MemoryType.PROJECT
         )

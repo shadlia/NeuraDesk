@@ -1,17 +1,19 @@
 from typing import List, Optional
-from app.models.memory import MemoryFact, MemoryType
-from app.services.supabase_service import supabase_service
+from app.schemas.memory import MemoryFact, MemoryType
+from app.database.client import supabase_client
 from datetime import datetime
-
-class StructuredStore:
+from dotenv import load_dotenv
+import os
+load_dotenv()
+class MemoryRepository:
     """
     Handles structured storage of exact facts in Supabase/Postgres.
     Uses Row-Level Security (RLS) for user isolation.
     """
     
     def __init__(self):
-        self.client = supabase_service.client
-        self.table_name = "user_memories"
+        self.client = supabase_client.client
+        self.table_name = os.getenv("MEMEORY_TABLE")
     
     async def store_fact(self, fact: MemoryFact) -> MemoryFact:
         """Store a structured fact in the database, updating if key exists"""

@@ -7,13 +7,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class SupabaseService:
+class SupabaseClient:
     """
     Centralized Supabase client service for the backend.
     Provides a singleton instance for database operations.
     """
     
-    _instance: Optional['SupabaseService'] = None
+    _instance: Optional['SupabaseClient'] = None
     _client: Optional[Client] = None
     
     def __new__(cls):
@@ -59,7 +59,7 @@ class SupabaseService:
 
 
 # Singleton instance for import
-supabase_service = SupabaseService()
+supabase_client = SupabaseClient()
 
 
 def get_supabase_client() -> Client:
@@ -70,4 +70,4 @@ def get_supabase_client() -> Client:
     Returns:
         Supabase Client instance
     """
-    return supabase_service.client
+    return supabase_client.client

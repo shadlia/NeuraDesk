@@ -1,8 +1,7 @@
 from typing import List
 import os
 
-
-class VectorStore:
+class VectorRepository:
     """
     Handles vector storage for semantic search of unstructured memories.
     Can use pgvector (Supabase), Pinecone, or FAISS.

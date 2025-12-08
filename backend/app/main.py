@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import llm_routes
+from app.api.v1 import chat
 
 app = FastAPI(title="NeuraDesk Backend - Phase 1")
 
@@ -13,8 +13,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(llm_routes.router)
+app.include_router(chat.router, prefix="/api/v1", tags=["chat"])
 
-@app.get("/")
+@app.get("/api/v1/health")
 def root():
     return {"message": "NeuraDesk Backend Running!"}

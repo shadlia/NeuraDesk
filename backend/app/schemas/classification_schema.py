@@ -39,32 +39,5 @@ class MemoryClassificationSchema(BaseModel):
         description="Brief explanation of the classification decision"
     )
     
-    class Config:
-        json_schema_extra = {
-            "examples": [
-                {
-                    "category": "personal",
-                    "importance": 0.9,
-                    "should_store": True,
-                    "key": "name",
-                    "value": "Sarah Johnson",
-                    "reason": "User stated their name, which is a stable personal identifier"
-                },
-                {
-                    "category": "preference",
-                    "importance": 0.7,
-                    "should_store": True,
-                    "key": "favorite_game",
-                    "value": "Valorant (especially Ascent map)",
-                    "reason": "Long-term gaming preference that helps personalize responses"
-                },
-                {
-                    "category": "ephemeral",
-                    "importance": 0.1,
-                    "should_store": False,
-                    "key": None,
-                    "value": None,
-                    "reason": "Casual greeting with no memorable information"
-                }
-            ]
-        }
+    
+        

@@ -1,5 +1,5 @@
-from app.models.memory import MemoryClassificationResult, MemoryType
-from app.services.llm_service import classify_fact_structured
+from app.schemas.memory import MemoryClassificationResult, MemoryType
+from app.ai.chat_engine import classify_fact_structured
 import json
 
 class MemoryClassifier:
@@ -48,7 +48,6 @@ class MemoryClassifier:
             )
         
         except (json.JSONDecodeError, KeyError, ValueError) as e:
-            # If parsing fails, don't store
             return MemoryClassificationResult(
                 category="ephemeral",
                 importance=0,
