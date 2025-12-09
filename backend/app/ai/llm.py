@@ -2,6 +2,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.intergrations.langfuse import LangfuseConfig
 import os
+from langgraph.checkpoint.memory import InMemorySaver
 
 from typing import Optional, Type, TypeVar
 from pydantic import BaseModel
@@ -68,6 +69,7 @@ class LLMService:
         user_content: str,
         trace_name: str,
         structured_output: Optional[BaseModel] = None,
+        conversation_id: Optional[str] = None,
     ) -> str:
         """
         Generic method to invoke the LLM with a Langfuse prompt.
@@ -98,10 +100,13 @@ class LLMService:
             model=model,
             system_prompt=prompt_template,
         )
+        if conversation_id:
+            agent = agent.bind(checkpoint=InMemorySaver())
         
         response = agent.invoke({"messages": [{"role": "user", "content": user_content}]},
         config={"callbacks": [langfuse_config._initialize_with_langchain()],
-                "run_name": trace_name 
+                "run_name": trace_name ,
+                "thread_id": conversation_id
         })
         if structured_output:
             return response["structured_response"]

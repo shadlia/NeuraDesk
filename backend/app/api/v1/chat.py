@@ -7,7 +7,13 @@ router = APIRouter()
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     chat_service = ChatService()
-    return await chat_service.get_response(req.user_id, req.message)
+    if req.conversation_id:
+        # existing conversation
+        return await chat_service.get_response(req.user_id, req.message, req.conversation_id)
+    else:
+        # create new conversation and return conversation id
+        conversation_id = await chat_service.new_conversation(req.user_id, req.message)
+        return await chat_service.get_response(req.user_id, req.message, conversation_id)
 
 
 @router.post("/test", response_model=ChatResponse)

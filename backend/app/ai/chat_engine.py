@@ -1,6 +1,6 @@
 from app.ai.llm import _llm_service
 from app.schemas.classification_schema import MemoryClassificationSchema
-
+from typing import Optional
 def classify_fact_structured(user_message: str, user_facts: str):
     """
     Classify a fact using structured output with Pydantic validation.
@@ -19,7 +19,7 @@ def classify_fact_structured(user_message: str, user_facts: str):
         structured_output=MemoryClassificationSchema,
     )
 
-def ai_response(user_message: str, user_facts: str, context: str):
+def ai_response(user_message: str, user_facts: str, context: Optional[str] = None, conversation_id: Optional[str] = None):
     """
     Ask a question to the LLM using LangChain + Langfuse.
     
@@ -45,5 +45,6 @@ def ai_response(user_message: str, user_facts: str, context: str):
     return _llm_service.invoke(
         prompt_name="neura_qa_v1",
         user_content=user_content,
-        trace_name="qa_session"
+        trace_name="qa_session",
+        conversation_id=conversation_id
     )
