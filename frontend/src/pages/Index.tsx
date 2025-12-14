@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -17,9 +18,56 @@ interface Message {
 
 const Index = () => {
   const { session, signOut } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const { toast } = useToast();
+
+  // Load conversation history when conversation_id changes
+  useEffect(() => {
+    const conversationId = searchParams.get("conversation_id");
+    
+    if (conversationId && conversationId !== currentConversationId) {
+      loadConversationHistory(conversationId);
+    } else if (!conversationId && currentConversationId) {
+      // Clear messages when starting a new conversation
+      setMessages([]);
+      setCurrentConversationId(null);
+    }
+  }, [searchParams]);
+
+  const loadConversationHistory = async (conversationId: string) => {
+    setIsLoadingHistory(true);
+    try {
+      const messagesData = await api.getMessages(conversationId);
+      
+      // Convert backend messages to UI format
+      const formattedMessages: Message[] = messagesData.map((msg) => ({
+        id: msg.id,
+        text: msg.content,
+        isUser: msg.role === "user",
+        timestamp: new Date(msg.created_at).toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+      }));
+      
+      setMessages(formattedMessages);
+      setCurrentConversationId(conversationId);
+    } catch (error) {
+      console.error("Error loading conversation history:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load conversation history.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
 
   const handleSendMessage = async (text: string) => {
     const userMessage: Message = {
@@ -38,6 +86,7 @@ const Index = () => {
         user_id: session?.user.id,
         message: text,
         context: "", // Context can be added here later if needed
+        conversation_id: currentConversationId || undefined,
       });
 
       const aiMessage: Message = {
@@ -48,6 +97,12 @@ const Index = () => {
       };
       
       setMessages((prev) => [...prev, aiMessage]);
+      
+      // If this was a new conversation, update the URL with the conversation_id
+      if (!currentConversationId && response.conversation_id) {
+        setCurrentConversationId(response.conversation_id);
+        setSearchParams({ conversation_id: response.conversation_id });
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
@@ -61,10 +116,7 @@ const Index = () => {
   };
 
   const handleSelectConversation = (id: string) => {
-    toast({
-      title: "Conversation loaded",
-      description: `Loading conversation ${id}...`,
-    });
+    setSearchParams({ conversation_id: id });
   };
 
   return (

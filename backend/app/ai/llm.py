@@ -24,7 +24,8 @@ class LLMService:
         self, 
         model_name: str = "gemini-2.5-flash",
         temperature: float = 0.4,
-        api_key: Optional[str] = None
+        api_key: Optional[str] = None,
+        memory_saver: Optional[InMemorySaver] = None
     ):
         """
         Initialize the LLM service.
@@ -37,6 +38,7 @@ class LLMService:
         self.model_name = model_name
         self.temperature = temperature
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.memory_saver = InMemorySaver()
     def _create_model(
         self, 
         name: Optional[str] = None,
@@ -70,6 +72,7 @@ class LLMService:
         trace_name: str,
         structured_output: Optional[BaseModel] = None,
         conversation_id: Optional[str] = None,
+        use_short_term_memory: Optional[bool] = False,
     ) -> str:
         """
         Generic method to invoke the LLM with a Langfuse prompt.
@@ -92,25 +95,26 @@ class LLMService:
         if structured_output : 
             agent = create_agent(
             model=model,
-            response_format=ToolStrategy(structured_output)
+            response_format=ToolStrategy(structured_output),
+            checkpointer=self.memory_saver
 
         )
         else:
             agent = create_agent(
             model=model,
-            system_prompt=prompt_template,
+            checkpointer=self.memory_saver
         )
-        if conversation_id:
-            agent = agent.bind(checkpoint=InMemorySaver())
+        print("conversation id ", conversation_id)
         
-        response = agent.invoke({"messages": [{"role": "user", "content": user_content}]},
+        response = agent.invoke({"messages": [{"role":"assistant", "content": prompt_template},{"role": "user", "content": user_content}]},
         config={"callbacks": [langfuse_config._initialize_with_langchain()],
                 "run_name": trace_name ,
-                "thread_id": conversation_id
+                "configurable": {"thread_id": conversation_id}    
         })
+        print(response)
         if structured_output:
             return response["structured_response"]
-        return response["messages"][1].content
+        return response["messages"][-1].content
 
 
 # Singleton instance for reuse

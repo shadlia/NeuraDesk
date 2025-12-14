@@ -46,5 +46,6 @@ def ai_response(user_message: str, user_facts: str, context: Optional[str] = Non
         prompt_name="neura_qa_v1",
         user_content=user_content,
         trace_name="qa_session",
-        conversation_id=conversation_id
+        conversation_id=conversation_id,
+        use_short_term_memory=True
     )

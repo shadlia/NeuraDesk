@@ -1,10 +1,31 @@
+import React from "react";
 import { ArrowRight, Brain, Calendar, FileText, MessageSquare, Plus, Search, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { api } from "@/api";
 
 export const StatsWidget = () => {
+  const [conversationCount, setConversationCount] = React.useState<number>(0);
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const conversations = await api.getConversations(user.id);
+        setConversationCount(conversations.length);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, [user?.id]);
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <Card className="bg-card/50 backdrop-blur-sm">
@@ -24,11 +45,11 @@ export const StatsWidget = () => {
       <Card className="bg-card/50 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <CardDescription>Conversations</CardDescription>
-          <CardTitle className="text-4xl font-bold">12</CardTitle>
+          <CardTitle className="text-4xl font-bold">{conversationCount}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-xs text-muted-foreground">
-            Active this week
+            Total conversations
           </div>
         </CardContent>
       </Card>
@@ -73,11 +94,45 @@ export const QuickActions = () => {
 
 export const RecentConversations = () => {
   const navigate = useNavigate();
-  const conversations = [
-    { id: 1, title: "Project Planning: Q4 Goals", summary: "Outline for marketing strategy and dev roadmap", time: "2h ago", tag: "Work" },
-    { id: 2, title: "React Hooks Explanation", summary: "Deep dive into useEffect and useMemo", time: "Yesterday", tag: "Learning" },
-    { id: 3, title: "Email Draft: Client Update", summary: "Drafting follow-up for meeting notes", time: "2 days ago", tag: "Productivity" },
-  ];
+  const [conversations, setConversations] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    const fetchConversations = async () => {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true);
+        const data = await api.getConversations(user.id);
+        // Sort by updated_at descending and take first 3
+        const sorted = data.sort((a, b) => 
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        ).slice(0, 3);
+        setConversations(sorted);
+      } catch (err) {
+        console.error("Failed to fetch conversations:", err);
+        setError("Failed to load conversations");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, [user?.id]);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 48) return "Yesterday";
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} days ago`;
+  };
 
   return (
     <Card className="h-full bg-card/50 backdrop-blur-sm border-none shadow-sm">
@@ -92,29 +147,61 @@ export const RecentConversations = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {conversations.map((chat) => (
-          <div 
-            key={chat.id} 
-            className="group flex items-start gap-4 rounded-xl border p-3 hover:bg-accent/5 hover:border-accent/30 transition-all cursor-pointer"
-            onClick={() => navigate("/chat")}
-          >
-            <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors">
-              <MessageSquare className="h-5 w-5" />
-            </div>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between">
-                <p className="font-semibold leading-none group-hover:text-accent transition-colors">{chat.title}</p>
-                <span className="text-xs text-muted-foreground">{chat.time}</span>
-              </div>
-              <p className="text-sm text-muted-foreground line-clamp-1">{chat.summary}</p>
-              <div className="flex gap-2 pt-1">
-                <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                  {chat.tag}
-                </span>
-              </div>
-            </div>
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Loading conversations...
           </div>
-        ))}
+        ) : error ? (
+          <div className="text-center py-8 text-destructive">
+            {error}
+          </div>
+        ) : conversations.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
+            <p>No conversations yet</p>
+            <Button 
+              variant="link" 
+              className="mt-2"
+              onClick={() => navigate("/chat")}
+            >
+              Start your first chat
+            </Button>
+          </div>
+        ) : (
+          conversations.map((chat) => (
+            <div 
+              key={chat.id} 
+              className="group flex items-start gap-4 rounded-xl border p-3 hover:bg-accent/5 hover:border-accent/30 transition-all cursor-pointer"
+              onClick={() => navigate(`/chat?conversation_id=${chat.id}`)}
+            >
+              <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="font-semibold leading-none group-hover:text-accent transition-colors">
+                    {chat.title}
+                  </p>
+                  <span className="text-xs text-muted-foreground">
+                    {formatTimeAgo(chat.updated_at)}
+                  </span>
+                </div>
+                <div className="flex gap-2 pt-1">
+                  {chat.is_favourite && (
+                    <span className="inline-flex items-center rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-600">
+                      ⭐ Favorite
+                    </span>
+                  )}
+                  {chat.is_archived && (
+                    <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                      📦 Archived
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
       </CardContent>
     </Card>
   );

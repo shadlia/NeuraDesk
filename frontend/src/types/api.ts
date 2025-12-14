@@ -2,9 +2,29 @@ export interface LLMRequest {
   user_id: string;
   message: string;
   context: string;
+  conversation_id?: string;
 }
 
 export interface LLMResponse {
   message: string;
   answer: string;
+  conversation_id: string;
+}
+
+export interface Conversation {
+  id: string;
+  user_id: string;
+  title: string;
+  is_favourite: boolean;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  role: string; // 'user' or 'assistant'
+  content: string;
+  created_at: string;
 }

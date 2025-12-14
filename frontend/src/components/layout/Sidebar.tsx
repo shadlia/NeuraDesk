@@ -2,54 +2,79 @@ import { MessageSquare, Clock, ChevronLeft, Plus, BookmarkIcon, History } from "
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { api } from "@/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface Conversation {
   id: string;
   title: string;
-  timestamp: string;
-  preview: string;
+  user_id: string;
+  is_favourite: boolean;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
 }
-
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    title: "Getting Started with AI",
-    timestamp: "2 min ago",
-    preview: "How does NeuraDesk work?"
-  },
-  {
-    id: "2",
-    title: "AI Capabilities Overview",
-    timestamp: "1 hour ago",
-    preview: "What can you help me with?"
-  },
-  {
-    id: "3",
-    title: "Machine Learning Basics",
-    timestamp: "Yesterday",
-    preview: "Explain neural networks to me"
-  },
-];
-
-const mockSavedNotes: Conversation[] = [
-  {
-    id: "s1",
-    title: "Important Research",
-    timestamp: "2 days ago",
-    preview: "Key insights about quantum computing"
-  },
-];
 
 interface SidebarProps {
   onSelectConversation?: (id: string) => void;
 }
 
 export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
   // Default to collapsed on mobile (simplistic approach, ideally use media query hook)
   const [isCollapsed, setIsCollapsed] = useState(window.innerWidth < 768);
   const [activeTab, setActiveTab] = useState<"recent" | "saved">("recent");
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchConversations = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        const data = await api.getConversations(user.id);
+        setConversations(data);
+        setError(null);
+      } catch (err) {
+        console.error("Failed to fetch conversations:", err);
+        setError("Failed to load conversations");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConversations();
+  }, [user?.id]);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 48) return "Yesterday";
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} days ago`;
+  };
+
+  const recentConversations = conversations
+    .filter(c => !c.is_archived && !c.is_favourite)
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+  const savedConversations = conversations
+    .filter(c => c.is_favourite && !c.is_archived)
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
   return (
     <>
@@ -113,6 +138,7 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
                 <Button 
                   className="w-full gap-2 bg-accent hover:bg-accent/90 shadow-sm"
                   size="sm"
+                  onClick={() => navigate("/chat")}
                 >
                   <Plus className="h-4 w-4" />
                   New Conversation
@@ -156,40 +182,67 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
               {/* Content */}
               <ScrollArea className="flex-1 px-3">
                 <div className="space-y-2 pb-4">
-                  {activeTab === "recent" ? (
+                  {loading ? (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      Loading conversations...
+                    </div>
+                  ) : error ? (
+                    <div className="text-center py-8 text-destructive text-sm">
+                      {error}
+                    </div>
+                  ) : activeTab === "recent" ? (
                     <>
-                      {mockConversations.map((conv) => (
-                        <button
-                          key={conv.id}
-                          onClick={() => onSelectConversation?.(conv.id)}
-                          className="w-full rounded-xl border bg-card/50 backdrop-blur-sm p-3.5 text-left transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 hover:shadow-sm group"
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                              <MessageSquare className="h-4 w-4 text-accent" />
+                      {recentConversations.length > 0 ? (
+                        recentConversations.map((conv) => (
+                          <button
+                            key={conv.id}
+                            onClick={() => {
+                              if (onSelectConversation) {
+                                onSelectConversation(conv.id);
+                              } else {
+                                navigate(`/chat?conversation_id=${conv.id}`);
+                              }
+                            }}
+                            className="w-full rounded-xl border bg-card/50 backdrop-blur-sm p-3.5 text-left transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 hover:shadow-sm group"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
+                                <MessageSquare className="h-4 w-4 text-accent" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-heading font-semibold text-sm truncate mb-1">
+                                  {conv.title}
+                                </p>
+                                <p className="text-xs text-muted-foreground/80">
+                                  {formatTimeAgo(conv.updated_at)}
+                                </p>
+                              </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-heading font-semibold text-sm truncate mb-1">
-                                {conv.title}
-                              </p>
-                              <p className="text-xs text-muted-foreground truncate mb-2">
-                                {conv.preview}
-                              </p>
-                              <p className="text-xs text-muted-foreground/80">
-                                {conv.timestamp}
-                              </p>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                          <MessageSquare className="h-8 w-8 text-muted-foreground/30 mb-3" />
+                          <p className="text-sm text-muted-foreground">No conversations yet</p>
+                          <p className="text-xs text-muted-foreground/70 mt-1">
+                            Start a new chat to get started
+                          </p>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
-                      {mockSavedNotes.length > 0 ? (
-                        mockSavedNotes.map((note) => (
+                      {savedConversations.length > 0 ? (
+                        savedConversations.map((note) => (
                           <button
                             key={note.id}
-                            onClick={() => onSelectConversation?.(note.id)}
+                            onClick={() => {
+                              if (onSelectConversation) {
+                                onSelectConversation(note.id);
+                              } else {
+                                navigate(`/chat?conversation_id=${note.id}`);
+                              }
+                            }}
                             className="w-full rounded-xl border bg-card/50 backdrop-blur-sm p-3.5 text-left transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 hover:shadow-sm group"
                           >
                             <div className="flex items-start gap-3">
@@ -200,11 +253,8 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
                                 <p className="font-heading font-semibold text-sm truncate mb-1">
                                   {note.title}
                                 </p>
-                                <p className="text-xs text-muted-foreground truncate mb-2">
-                                  {note.preview}
-                                </p>
                                 <p className="text-xs text-muted-foreground/80">
-                                  {note.timestamp}
+                                  {formatTimeAgo(note.updated_at)}
                                 </p>
                               </div>
                             </div>
