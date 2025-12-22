@@ -41,8 +41,17 @@ class ConversationRepository:
     def create_conversation(self, user_id: str, title: str):
         return self.client.table(self.table_name).insert({"user_id": user_id, "title": title}).execute()
     
-    def update_conversation(self, conversation_id: str, title: str):
-        return self.client.table(self.table_name).update({"title": title}).eq("id", conversation_id).execute()
+    def update_conversation(self, conversation_id: str, title: str = None, is_favorite: bool = None):
+        update_data = {}
+        if title is not None:
+            update_data["title"] = title
+        if is_favorite is not None:
+            update_data["is_favorite"] = is_favorite
+            
+        if not update_data:
+            return None
+            
+        return self.client.table(self.table_name).update(update_data).eq("id", conversation_id).execute()
     
     def delete_conversation(self, conversation_id: str):
         return self.client.table(self.table_name).delete().eq("id", conversation_id).execute()

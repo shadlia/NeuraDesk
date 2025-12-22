@@ -4,11 +4,43 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { StatsWidget, QuickActions, RecentConversations, InsightsWidget, FutureFeatureCard } from "@/components/dashboard/DashboardWidgets";
 import { useAuth } from "@/contexts/AuthContext";
 
+import { useState, useEffect } from "react";
+import { getUserProfile } from "@/api/profileApi";
+
 const Dashboard = () => {
   const { session } = useAuth();
   const userEmail = session?.user?.email;
   const { user_metadata } = session?.user || {};
-  const userName = user_metadata?.first_name || user_metadata?.full_name || userEmail?.split("@")[0] || "Guest";
+  
+  // Initialize with session data, but update with separate fetch
+  const [displayName, setDisplayName] = useState(
+    user_metadata?.first_name || user_metadata?.full_name || userEmail?.split("@")[0] || "Guest"
+  );
+  const [greeting, setGreeting] = useState("Good Morning");
+
+  useEffect(() => {
+    // 1. Determine greeting time
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good Morning");
+    else if (hour < 18) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
+
+    // 2. Fetch fresh profile data
+    const fetchProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile?.first_name) {
+          setDisplayName(profile.first_name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch latest profile", error);
+      }
+    };
+    
+    if (session) {
+      fetchProfile();
+    }
+  }, [session]);
 
   return (
     <div className="min-h-screen bg-background font-body flex flex-col">
@@ -27,7 +59,7 @@ const Dashboard = () => {
             {/* Hero / Welcome */}
             <div className="space-y-2">
               <h1 className="text-3xl font-heading font-bold tracking-tight sm:text-4xl">
-                Good Morning, {userName}! <span className="text-2xl">👋</span>
+                {greeting}, {displayName}! <span className="text-2xl">👋</span>
               </h1>
               <p className="text-lg text-muted-foreground">
                 Ready to conquer the day? You have 3 new insights waiting for you.

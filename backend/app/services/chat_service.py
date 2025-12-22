@@ -67,10 +67,10 @@ class ChatService:
         self.message_repository.save_message(conversation_id, "user", user_message)
         self.message_repository.save_message(conversation_id, "assistant", answer)
         
-        # 6. Process memory (non-critical)
+        # 6. Process query to save informatiaons  (non-critical)
         # try:
         #     await self.memory_manager.process_query(user_id, user_message, str(old_facts))
         # except Exception as e:
         #     print(f"Memory processing failed (non-critical): {str(e)}")
         
-        return ChatResponse(message=user_message, answer=answer, conversation_id=conversation_id)
+        return ChatResponse(message=user_message, answer=answer, conversation_id=conversation_id, title=title)

@@ -9,6 +9,7 @@ export interface LLMResponse {
   message: string;
   answer: string;
   conversation_id: string;
+  title?: string;
 }
 
 export interface Conversation {

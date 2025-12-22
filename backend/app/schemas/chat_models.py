@@ -10,3 +10,4 @@ class ChatResponse(BaseModel):
     message: str
     answer: str
     conversation_id: str
+    title: Optional[str] = None

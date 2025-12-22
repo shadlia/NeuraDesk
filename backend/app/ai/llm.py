@@ -103,9 +103,7 @@ class LLMService:
             agent = create_agent(
             model=model,
             checkpointer=self.memory_saver
-        )
-        print("conversation id ", conversation_id)
-        
+        )        
         response = agent.invoke({"messages": [{"role":"assistant", "content": prompt_template},{"role": "user", "content": user_content}]},
         config={"callbacks": [langfuse_config._initialize_with_langchain()],
                 "run_name": trace_name ,

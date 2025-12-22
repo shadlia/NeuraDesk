@@ -21,4 +21,23 @@ export const api = {
       method: "GET",
     });
   },
+
+  getConversation: async (conversationId: string): Promise<Conversation> => {
+    return client<Conversation>(`/api/v1/conversation/${conversationId}`, {
+      method: "GET",
+    });
+  },
+
+  updateConversation: async (conversationId: string, updates: Partial<Conversation>): Promise<void> => {
+    return client<void>(`/api/v1/conversations/${conversationId}`, {
+      method: "PATCH",
+      body: JSON.stringify(updates),
+    });
+  },
+
+  deleteConversation: async (conversationId: string): Promise<void> => {
+    return client<void>(`/api/v1/conversations/${conversationId}`, {
+      method: "DELETE",
+    });
+  },
 };

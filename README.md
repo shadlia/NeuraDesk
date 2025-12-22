@@ -26,7 +26,7 @@
 ## Current Progress
 
 **Status:** Phase 2 - Memory & Context (Active)  
-**Last Updated:** December 9, 2025
+**Last Updated:** December 19, 2025
 
 ### ✅ Completed Milestones
 - [x] **Core Backend:** FastAPI + Gemini 2.0 Flash + LangChain
@@ -43,28 +43,25 @@
   - [x] **Message Storage:** All user and AI messages saved to database
   - [x] **Unified Chat Endpoint:** Single endpoint handles both new and existing conversations
   - [x] **Auto Title Generation:** Conversations automatically titled from first message
+- [x] **Frontend Enhancements:**
+  - [x] **Smart Dates:** Chat timestamps show "Today", "Yesterday", or date
+  - [x] **Context Menus:** Right-click to Rename, Delete, or Favorite conversations
+  - [x] **Dynamic Dashboard:** Real-time greeting (Morning/Evening) and profile updates
+  - [x] **Favorites:** Gold icon distinction for saved chats
 - [x] **Database Integration:**
   - [x] Centralized Supabase service
   - [x] Row Level Security (RLS) for user privacy
   - [x] Pydantic models for structured data validation
   - [x] Conversation and Message repositories
-- [x] **Short-Term Memory (Hybrid Start):**
-  - [x] **In-Memory Session History:** Maintains context within active server sessions (LangChain In-Memory) using `self.memory_saver`.
-  - [ ] **Note:** Currently resets on application restart.
 
 ### 🔄 In Progress
-- [ ] **Persistent Short-Term Memory:** Load full conversation history from database when accessing persistent chats.
 - [ ] **Vector Embeddings:** Semantic search for broader context retrieval (RAG).
 - [ ] Streaming responses
 
 ### 📋 Phase 2 Next Steps
-1. **Hydrate Memory from DB:** Ensure "Short-Term Memory" survives restarts by loading from `messages` table on init.
-2. **Vector Storage:** Implement vector embeddings for knowledge retrieval.
-3. Build "Conversation History" UI in frontend
-4. Add conversation management features (delete, archive, favorite)
-5. Build "Memory Explorer" UI in dashboard
-4. Add conversation management features (delete, archive, favorite)
-5. Build "Memory Explorer" UI in dashboard
+1. **Vector Storage:** Implement vector embeddings for knowledge retrieval.
+2. Build "Memory Explorer" UI in dashboard
+3. Implement "Archive" functionality for old chats
 
 > 📊 **See [MILESTONES.md](./MILESTONES.md) for detailed progress tracking.**
 
@@ -222,6 +219,16 @@ CREATE TABLE messages (
   - If `conversation_id` is null → creates new conversation
   - If `conversation_id` is provided → continues existing conversation
   - All messages are automatically saved to database
+  
+**PATCH `/api/v1/conversations/{conversation_id}`**
+- **Request:** `{ title?, is_favourite? }`
+- **Response:** `{ status: "success" }`
+- **Behavior:** Updates conversation title or favorite status
+
+**DELETE `/api/v1/conversations/{conversation_id}`**
+- **Request:** None
+- **Response:** `{ status: "success" }`
+- **Behavior:** Permanently deletes conversation and all associated messages
 
 ---
 

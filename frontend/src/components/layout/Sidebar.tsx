@@ -1,4 +1,5 @@
 import { MessageSquare, Clock, ChevronLeft, Plus, BookmarkIcon, History } from "lucide-react";
+import { ConversationItem } from "./ConversationItem";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -20,9 +21,10 @@ interface Conversation {
 
 interface SidebarProps {
   onSelectConversation?: (id: string) => void;
+  refreshTrigger?: number;
 }
 
-export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
+export const Sidebar = ({ onSelectConversation, refreshTrigger = 0 }: SidebarProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -54,7 +56,7 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
     };
 
     fetchConversations();
-  }, [user?.id]);
+  }, [user?.id, refreshTrigger]);
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -69,7 +71,7 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
   };
 
   const recentConversations = conversations
-    .filter(c => !c.is_archived && !c.is_favourite)
+    .filter(c => !c.is_archived)
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 
   const savedConversations = conversations
@@ -194,31 +196,19 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
                     <>
                       {recentConversations.length > 0 ? (
                         recentConversations.map((conv) => (
-                          <button
+                          <ConversationItem 
                             key={conv.id}
-                            onClick={() => {
-                              if (onSelectConversation) {
-                                onSelectConversation(conv.id);
-                              } else {
-                                navigate(`/chat?conversation_id=${conv.id}`);
-                              }
+                            conversation={conv}
+                            onSelect={(id) => {
+                                if (onSelectConversation) {
+                                  onSelectConversation(id);
+                                } else {
+                                  navigate(`/chat?conversation_id=${id}`);
+                                }
                             }}
-                            className="w-full rounded-xl border bg-card/50 backdrop-blur-sm p-3.5 text-left transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 hover:shadow-sm group"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/10 group-hover:bg-accent/20 transition-colors">
-                                <MessageSquare className="h-4 w-4 text-accent" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-heading font-semibold text-sm truncate mb-1">
-                                  {conv.title}
-                                </p>
-                                <p className="text-xs text-muted-foreground/80">
-                                  {formatTimeAgo(conv.updated_at)}
-                                </p>
-                              </div>
-                            </div>
-                          </button>
+                            onDelete={(id) => setConversations(prev => prev.filter(c => c.id !== id))}
+                            onUpdate={(id, updates) => setConversations(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c))}
+                          />
                         ))
                       ) : (
                         <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -234,31 +224,19 @@ export const Sidebar = ({ onSelectConversation }: SidebarProps) => {
                     <>
                       {savedConversations.length > 0 ? (
                         savedConversations.map((note) => (
-                          <button
+                          <ConversationItem 
                             key={note.id}
-                            onClick={() => {
-                              if (onSelectConversation) {
-                                onSelectConversation(note.id);
-                              } else {
-                                navigate(`/chat?conversation_id=${note.id}`);
-                              }
+                            conversation={note}
+                            onSelect={(id) => {
+                                if (onSelectConversation) {
+                                  onSelectConversation(id);
+                                } else {
+                                  navigate(`/chat?conversation_id=${id}`);
+                                }
                             }}
-                            className="w-full rounded-xl border bg-card/50 backdrop-blur-sm p-3.5 text-left transition-all duration-200 hover:bg-accent/10 hover:border-accent/30 hover:shadow-sm group"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 group-hover:bg-amber-500/20 transition-colors">
-                                <BookmarkIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-heading font-semibold text-sm truncate mb-1">
-                                  {note.title}
-                                </p>
-                                <p className="text-xs text-muted-foreground/80">
-                                  {formatTimeAgo(note.updated_at)}
-                                </p>
-                              </div>
-                            </div>
-                          </button>
+                            onDelete={(id) => setConversations(prev => prev.filter(c => c.id !== id))}
+                            onUpdate={(id, updates) => setConversations(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c))}
+                          />
                         ))
                       ) : (
                         <div className="flex flex-col items-center justify-center py-12 text-center">

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.schemas.chat_models import ChatRequest, ChatResponse
-from app.schemas.conversations import Conversation
+from app.schemas.conversations import Conversation, ConversationUpdate
 from app.schemas.messages import Message
 from app.services.chat_service import ChatService
 from app.database.repositories.conversations import ConversationRepository
@@ -28,6 +28,13 @@ async def get_conversations(user_id: str):
     return conversation_repo.get_conversations(user_id)
 
 
+@router.get("/conversation/{conversation_id}", response_model=Conversation)
+async def get_conversation(conversation_id: str):
+    """Get conversation details"""
+    conversation_repo = ConversationRepository()
+    return conversation_repo.get_conversation(conversation_id)
+
+
 @router.get("/conversations/{conversation_id}/messages", response_model=List[Message])
 async def get_messages(conversation_id: str):
     """Get all messages for a conversation"""
@@ -37,5 +44,18 @@ async def get_messages(conversation_id: str):
 
 @router.post("/test", response_model=ChatResponse)
 async def test(req: ChatRequest):
-    answer = _llm_service.invoke("MemoryFactClassifier", req.question,"qa_session")
     return ChatResponse(message=req.question, answer=answer)
+
+@router.patch("/conversations/{conversation_id}")
+async def update_conversation(conversation_id: str, update: ConversationUpdate):
+    """Update conversation title or favorite status"""
+    repo = ConversationRepository()
+    repo.update_conversation(conversation_id, title=update.title, is_favorite=update.is_favourite)
+    return {"status": "success"}
+
+@router.delete("/conversations/{conversation_id}")
+async def delete_conversation(conversation_id: str):
+    """Delete a conversation"""
+    repo = ConversationRepository()
+    repo.delete_conversation(conversation_id)
+    return {"status": "success"}
