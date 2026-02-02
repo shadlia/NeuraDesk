@@ -4,11 +4,12 @@ from app.intergrations.langfuse import LangfuseConfig
 import os
 from langgraph.checkpoint.memory import InMemorySaver
 
-from typing import Optional, Type, TypeVar
+from typing import Optional, Type, TypeVar, List
 from pydantic import BaseModel
 from app.schemas.classification_schema import MemoryClassificationSchema
 from langchain.agents import create_agent
 from langchain.agents.structured_output import ToolStrategy
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 T = TypeVar('T', bound=BaseModel)
 
@@ -113,6 +114,22 @@ class LLMService:
         if structured_output:
             return response["structured_response"]
         return response["messages"][-1].content
+
+    def get_embedding(self, text: str) -> List[float]:
+        """
+        Generate embedding for a given text using Google GenerativeAIEmbeddings.
+        
+        Args:
+            text: Text to embed
+            
+        Returns:
+            List of embedding floats
+        """
+        embeddings = GoogleGenerativeAIEmbeddings(
+            model="models/text-embedding-004",
+            api_key=self.api_key
+        )
+        return embeddings.embed_query(text)
 
 
 # Singleton instance for reuse

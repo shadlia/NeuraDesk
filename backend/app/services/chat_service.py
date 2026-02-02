@@ -14,8 +14,8 @@ class ChatService:
 
     async def get_response(self, user_id: str, user_message: str, conversation_id: Optional[str] = None):
         # 1. Get user profile/facts
-        #old_facts = await self.memory_manager.get_user_profile(user_id)
-        old_facts=""
+        old_facts = await self.memory_manager.get_user_profile(user_id)
+        
         
         # 2. Ask LLM 
         try:
@@ -33,10 +33,10 @@ class ChatService:
             self.message_repository.save_message(conversation_id, "assistant", answer)
             
             # Process memory (background task, can fail without affecting the response)
-            # try:
-            #     await self.memory_manager.process_query(user_id, user_message, str(old_facts))
-            # except Exception as e:
-            #     print(f"Memory processing failed (non-critical): {str(e)}")
+            try:
+                await self.memory_manager.process_query(user_id, user_message, str(old_facts))
+            except Exception as e:
+                print(f"Memory processing failed (non-critical): {str(e)}")
         else:
             raise Exception("AI returned empty response")
         
@@ -45,8 +45,7 @@ class ChatService:
     async def create_and_respond(self, user_id: str, user_message: str):
         """Create new conversation and get response - only saves if AI succeeds"""
         # 1. Get user profile/facts
-        #old_facts = await self.memory_manager.get_user_profile(user_id)
-        old_facts=""
+        old_facts = await self.memory_manager.get_user_profile(user_id)
         # 2. Ask LLM 
         try:
             answer = ai_response(user_message, user_facts=str(old_facts), conversation_id=None)
@@ -68,9 +67,9 @@ class ChatService:
         self.message_repository.save_message(conversation_id, "assistant", answer)
         
         # 6. Process query to save informatiaons  (non-critical)
-        # try:
-        #     await self.memory_manager.process_query(user_id, user_message, str(old_facts))
-        # except Exception as e:
-        #     print(f"Memory processing failed (non-critical): {str(e)}")
+        try:
+            await self.memory_manager.process_query(user_id, user_message, str(old_facts))
+        except Exception as e:
+            print(f"Memory processing failed (non-critical): {str(e)}")
         
         return ChatResponse(message=user_message, answer=answer, conversation_id=conversation_id, title=title)

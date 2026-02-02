@@ -26,7 +26,7 @@
 ## Current Progress
 
 **Status:** Phase 2 - Memory & Context (Active)  
-**Last Updated:** December 19, 2025
+**Last Updated:** February 2, 2026
 
 ### ✅ Completed Milestones
 - [x] **Core Backend:** FastAPI + Gemini 2.0 Flash + LangChain
@@ -36,6 +36,7 @@
 - [x] **Memory Management System:**
   - [x] **Smart Classifier:** LLM-based classification of user facts (Personal, Preference, Project, Ephemeral)
   - [x] **Structured Storage:** Supabase (PostgreSQL) storage for long-term facts
+  - [x] **Vector Storage:** **(NEW)** Semantic memory using Supabase `pgvector` & Gemini Embeddings
   - [x] **Context Injection:** Auto-retrieval of relevant memories for chat context
   - [x] **Background Processing:** Non-blocking memory extraction
 - [x] **Conversation Persistence:**
@@ -55,11 +56,12 @@
   - [x] Conversation and Message repositories
 
 ### 🔄 In Progress
-- [ ] **Vector Embeddings:** Semantic search for broader context retrieval (RAG).
+- [ ] **RAG Integration:** Connecting Vector Search results to LLM context window.
+- [ ] **Document Ingestion:** Uploading PDFs/MD files to vector store.
 - [ ] Streaming responses
 
 ### 📋 Phase 2 Next Steps
-1. **Vector Storage:** Implement vector embeddings for knowledge retrieval.
+1. **Full RAG Pipeline:** Ensure `ChatService` retrieves and utilizes vector memories in real-time.
 2. Build "Memory Explorer" UI in dashboard
 3. Implement "Archive" functionality for old chats
 
@@ -72,8 +74,8 @@
 | Phase | TODO / Description | Skills / Concepts | Tools / Tech | Expected Output |
 |-------|-----------------|-----------------|---------------|----------------|
 | **1. Setup and LLM API Base** | ✅ **Done** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
-| **2. Memory & Context** | ✅ **In Progress** - Conversation history, "Smart Memory" (user preferences, facts), Session management | Vector stores (long-term), Redis (short-term), User profiling | Supabase (pgvector), Redis, LangChain Memory | AI remembers you, your past chats, and preferences |
-| **3. Document Ingestion / RAG** | TODO: Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Chroma / Pinecone, OpenAI / BGE embeddings | Ask questions → AI answers using documents |
+| **2. Memory & Context** | ✅ **Done** - Conversation history, "Smart Memory" (Structured + Vector), Session management | Vector stores (long-term), User profiling | Supabase (pgvector), Postgres RPC, LangChain Memory | AI remembers you, your past chats, and preferences |
+| **3. Document Ingestion / RAG** | 🔄 **Next Up** - Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Gemini Embeddings, Supabase Vector | Ask questions → AI answers using documents |
 | **4. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
 | **5. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
 | **6. Fine-Tuning** | TODO: Fine-tune model on personal / domain-specific data | LoRA, QLoRA, SFT | HuggingFace TRL, LoRA adapters | AI answers more accurately for personal workflow or specialized domain |
@@ -84,8 +86,8 @@
 
 ## Tech Stack (TODO / Planned)
 
-- **LLM APIs:** OpenAI GPT-4.2 / GPT-5 / Gemini 2.0  
-- **Embeddings / RAG:** OpenAI embeddings, BGE, Chroma, Pinecone  
+- **LLM APIs:** Gemini 2.0  
+- **Embeddings / RAG:** Gemini `text-embedding-004`, Supabase `pgvector`
 - **Agents / Workflow:** LangChain, LlamaIndex, CrewAI  
 - **Automation:** Selenium, Playwright, Python scripts  
 - **Multimodal:** Gemini Vision, OpenCV, Whisper, XTTS  
@@ -109,22 +111,28 @@ NeuraDesk features a sophisticated **Memory Management System** that allows the 
 
 2.  **Manager (`app/memory/manager.py`)**:
     *   Orchestrates the flow: User Query -> Classification -> Storage.
-    *   Decides what to store based on importance and category.
+    *   **Hybrid Storage Strategy**:
+        *   **Structured**: Stores exact Key/Value pairs in Postgres for instant "User Profile" lookup.
+        *   **Vector**: Generates embeddings (numbers representing meaning) and stores them in Supabase Vector for "Fuzzy" semantic search.
     *   Retrieves relevant memories to inject into the chat context.
 
 3.  **Memory Repository (`app/database/repositories/memory.py`)**:
     *   Persists facts to **Supabase** (`user_memories` table).
     *   Uses **Row Level Security (RLS)** to ensure users only access their own data.
-    *   Implements upsert logic to update existing facts.
+
+4.  **Vector Repository (`app/database/repositories/vector.py`)**:
+    *   Persists embeddings to **Supabase** (`memory_embeddings` table).
+    *   Uses **Postgres RPC** (`match_embeddings`) to perform fast cosine similarity search.
 
 ### Data Flow
 1.  **User asks:** "My name is Sarah and I love Python."
 2.  **LLM Answers:** "Nice to meet you Sarah! Python is great."
 3.  **Background Process:**
-    *   Classifier detects: `Category: Personal`, `Key: name`, `Value: Sarah`, `Importance: 0.9`.
-    *   Manager delegates to MemoryRepository to save this fact to Supabase.
-4.  **Next Query:** "What's my favorite language?"
-5.  **Context Injection:** Manager retrieves "Sarah loves Python" via MemoryRepository and feeds it to the LLM.
+    *   Classifier detects: `Category: Personal`, `Key: name`, `Value: Sarah`.
+    *   **Action 1**: Save to Structured DB (Role: Profile Display).
+    *   **Action 2**: Generate Embedding -> Save to Vector DB (Role: Deep Recall).
+4.  **Next Query:** "What language do I like?" (Note: "language" != "Python")
+5.  **Context Injection (Future):** Vector Search finds "Sarah loves Python" because "language" is semantically close to "Python".
 6.  **LLM Answers:** "You mentioned you love Python!"
 
 ---
@@ -380,10 +388,10 @@ NeuraDesk/
 ---
 
 **Current Focus:**  
-- Complete Phase 1: LLM API with frontend testing interface  
+- **Complete RAG Pipeline:** Connect vector retrieval to ChatService.
+- **Document Ingestion:** Implement PDF upload and chunking.
 - Implement session management and conversation history
 - Add streaming responses for better UX
-- Begin Phase 2 planning: Document ingestion and RAG setup  
 
 **Maintenance Notes:**  
 - Keep dependencies updated (especially SDK versions)
