@@ -26,7 +26,7 @@
 ## Current Progress
 
 **Status:** Phase 2 - Memory & Context (Active)  
-**Last Updated:** February 2, 2026
+**Last Updated:** February 14, 2026
 
 ### ✅ Completed Milestones
 - [x] **Core Backend:** FastAPI + Gemini 2.0 Flash + LangChain
@@ -34,10 +34,14 @@
 - [x] **Frontend:** React + Vite + Tailwind + Modern UI/UX
 - [x] **Authentication:** Supabase Auth (Email/OTP) + Protected Routes
 - [x] **Memory Management System:**
-  - [x] **Smart Classifier:** LLM-based classification of user facts (Personal, Preference, Project, Ephemeral)
-  - [x] **Structured Storage:** Supabase (PostgreSQL) storage for long-term facts
-  - [x] **Vector Storage:** **(NEW)** Semantic memory using Supabase `pgvector` & Gemini Embeddings
-  - [x] **Context Injection:** Auto-retrieval of relevant memories for chat context
+  - [x] **Smart Classifier:** LLM-based classification including **Project Milestones** & **Skills**.
+  - [x] **Entity Resolution:** Intelligently links updates to existing projects (e.g., "frontend done" -> linked to *Project NeuraDesk*).
+  - [x] **Auto-Enhancement:** Expands generic updates (e.g., "finished" → "Backend Finished") for richer context.
+  - [x] **Refactored Manager:** Clean architecture with dedicated helper methods for key generation and value enhancement.
+  - [x] **Hybrid Storage:** 
+    - **Structured:** Supabase for exact facts.
+    - **Vector:** `pgvector` with **HuggingFace Embeddings** (768d) for semantic search.
+  - [x] **Context Injection:** Auto-retrieval of relevant memories.
   - [x] **Background Processing:** Non-blocking memory extraction
 - [x] **Conversation Persistence:**
   - [x] **Conversation Management:** Create and track conversations per user
@@ -45,10 +49,10 @@
   - [x] **Unified Chat Endpoint:** Single endpoint handles both new and existing conversations
   - [x] **Auto Title Generation:** Conversations automatically titled from first message
 - [x] **Frontend Enhancements:**
-  - [x] **Smart Dates:** Chat timestamps show "Today", "Yesterday", or date
-  - [x] **Context Menus:** Right-click to Rename, Delete, or Favorite conversations
-  - [x] **Dynamic Dashboard:** Real-time greeting (Morning/Evening) and profile updates
-  - [x] **Favorites:** Gold icon distinction for saved chats
+  - [x] **Growth Board:** New dashboard widget visualizing Projects, Skills, Focus, and Bio.
+  - [x] **Skill Graph:** Dedicated visualization for user skills and tools.
+  - [x] **Smart Milestones:** Clean date formatting for project updates.
+  - [x] **Chat UI:** Smart dates, context menus, and favorites.
 - [x] **Database Integration:**
   - [x] Centralized Supabase service
   - [x] Row Level Security (RLS) for user privacy
@@ -61,9 +65,10 @@
 - [ ] Streaming responses
 
 ### 📋 Phase 2 Next Steps
-1. **Full RAG Pipeline:** Ensure `ChatService` retrieves and utilizes vector memories in real-time.
-2. Build "Memory Explorer" UI in dashboard
-3. Implement "Archive" functionality for old chats
+1. **Refine RAG:** Connect vector retrieval to `ChatService` for long-term memory recall.
+2. **Monitor Classification:** Fine-tune the LLM prompt to ensure consistent skill/milestone detection.
+3. **Memory Explorer:** Advanced UI to browse and manage all stored memories.
+4. **Archive:** Implement "Archive" functionality for old chats.
 
 > 📊 **See [MILESTONES.md](./MILESTONES.md) for detailed progress tracking.**
 
@@ -75,7 +80,7 @@
 |-------|-----------------|-----------------|---------------|----------------|
 | **1. Setup and LLM API Base** | ✅ **Done** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
 | **2. Memory & Context** | ✅ **Done** - Conversation history, "Smart Memory" (Structured + Vector), Session management | Vector stores (long-term), User profiling | Supabase (pgvector), Postgres RPC, LangChain Memory | AI remembers you, your past chats, and preferences |
-| **3. Document Ingestion / RAG** | 🔄 **Next Up** - Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | Gemini Embeddings, Supabase Vector | Ask questions → AI answers using documents |
+| **3. Document Ingestion / RAG** | 🔄 **Next Up** - Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | HuggingFace Embeddings, Supabase Vector | Ask questions → AI answers using documents |
 | **4. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
 | **5. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
 | **6. Fine-Tuning** | TODO: Fine-tune model on personal / domain-specific data | LoRA, QLoRA, SFT | HuggingFace TRL, LoRA adapters | AI answers more accurately for personal workflow or specialized domain |
@@ -87,7 +92,7 @@
 ## Tech Stack (TODO / Planned)
 
 - **LLM APIs:** Gemini 2.0  
-- **Embeddings / RAG:** Gemini `text-embedding-004`, Supabase `pgvector`
+- **Embeddings / RAG:** HuggingFace `all-mpnet-base-v2`, Supabase `pgvector`
 - **Agents / Workflow:** LangChain, LlamaIndex, CrewAI  
 - **Automation:** Selenium, Playwright, Python scripts  
 - **Multimodal:** Gemini Vision, OpenCV, Whisper, XTTS  

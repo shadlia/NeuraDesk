@@ -29,3 +29,15 @@ export interface Message {
   content: string;
   created_at: string;
 }
+
+export interface MemoryFact {
+  id: string;
+  user_id: string;
+  category: "personal" | "preference" | "project" | "project_milestone" | "ephemeral";
+  importance: number;
+  key: string;
+  value: string;
+  context?: string;
+  created_at: string;
+  updated_at: string;
+}

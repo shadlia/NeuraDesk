@@ -5,7 +5,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { api } from "@/api";
+import { UserProfileWidget } from "./UserProfileWidget"; 
+import { GrowthBoardWidget } from "./GrowthBoardWidget"; // Import new widget
+
+export { UserProfileWidget, GrowthBoardWidget }; // Export it
 
 export const StatsWidget = () => {
   const [conversationCount, setConversationCount] = React.useState<number>(0);
@@ -71,22 +77,22 @@ export const StatsWidget = () => {
 export const QuickActions = () => {
   const navigate = useNavigate();
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="grid grid-cols-2 gap-3">
       <Button 
-        size="lg" 
-        className="bg-accent hover:bg-accent/90 text-white shadow-md"
+        variant="default"
+        className="bg-accent hover:bg-accent/90 text-white h-10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
         onClick={() => navigate("/chat")}
       >
-        <Plus className="mr-2 h-5 w-5" /> New Chat
+        <Plus className="mr-2 h-3 w-3" /> New Chat
       </Button>
-      <Button size="lg" variant="outline" className="bg-card hover:bg-accent/5">
-        <FileText className="mr-2 h-5 w-5 text-blue-500" /> Upload Doc
+      <Button variant="outline" className="bg-card h-10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent/5 border-border/60">
+        <FileText className="mr-2 h-3 w-3 text-blue-500" /> Upload
       </Button>
-      <Button size="lg" variant="outline" className="bg-card hover:bg-accent/5">
-        <Sparkles className="mr-2 h-5 w-5 text-yellow-500" /> Daily Tip
+      <Button variant="outline" className="bg-card h-10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent/5 border-border/60">
+        <Sparkles className="mr-2 h-3 w-3 text-yellow-500" /> Tips
       </Button>
-      <Button size="lg" variant="outline" className="bg-card hover:bg-accent/5">
-        <Zap className="mr-2 h-5 w-5 text-purple-500" /> Quick Task
+      <Button variant="outline" className="bg-card h-10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-accent/5 border-border/60">
+        <Zap className="mr-2 h-3 w-3 text-purple-500" /> Tasks
       </Button>
     </div>
   );
@@ -106,14 +112,13 @@ export const RecentConversations = () => {
       try {
         setLoading(true);
         const data = await api.getConversations(user.id);
-        // Sort by updated_at descending and take first 3
         const sorted = data.sort((a, b) => 
           new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        ).slice(0, 3);
+        ).slice(0, 4); // Show 4 instead of 3
         setConversations(sorted);
       } catch (err) {
         console.error("Failed to fetch conversations:", err);
-        setError("Failed to load conversations");
+        setError("Failed to load history");
       } finally {
         setLoading(false);
       }
@@ -122,123 +127,141 @@ export const RecentConversations = () => {
     fetchConversations();
   }, [user?.id]);
 
-  const formatTimeAgo = (dateString: string) => {
+  const formatShortDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
     
-    if (diffInHours < 1) return "Just now";
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 1) return "Now";
+    if (diffInHours < 24) return `${diffInHours}H`;
     if (diffInHours < 48) return "Yesterday";
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   return (
-    <Card className="h-full bg-card/50 backdrop-blur-sm border-none shadow-sm">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-heading">Recent Conversations</CardTitle>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/chat")}>View All</Button>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Search history..." className="pl-9 bg-background/50" />
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-6">
+      <div className="space-y-4">
         {loading ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Loading conversations...
+          <div className="flex flex-col gap-4">
+             {[1, 2, 3].map(i => <div key={i} className="h-16 w-full rounded-2xl bg-muted/40 animate-pulse" />)}
           </div>
         ) : error ? (
-          <div className="text-center py-8 text-destructive">
+          <div className="text-xs text-destructive font-bold uppercase tracking-widest text-center py-10 opacity-60">
             {error}
           </div>
         ) : conversations.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>No conversations yet</p>
+          <div className="text-center py-12 px-6 rounded-3xl border border-dashed bg-background/5 p-8">
+            <MessageSquare className="h-8 w-8 mx-auto mb-4 text-muted-foreground/30" />
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/50">No activity yet</p>
             <Button 
               variant="link" 
-              className="mt-2"
+              className="mt-4 text-[10px] font-black uppercase tracking-widest text-accent"
               onClick={() => navigate("/chat")}
             >
-              Start your first chat
+              Initialize Chat
             </Button>
           </div>
         ) : (
-          conversations.map((chat) => (
-            <div 
-              key={chat.id} 
-              className="group flex items-start gap-4 rounded-xl border p-3 hover:bg-accent/5 hover:border-accent/30 transition-all cursor-pointer"
-              onClick={() => navigate(`/chat?conversation_id=${chat.id}`)}
-            >
-              <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors">
-                <MessageSquare className="h-5 w-5" />
-              </div>
-              <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold leading-none group-hover:text-accent transition-colors">
-                    {chat.title}
-                  </p>
-                  <span className="text-xs text-muted-foreground">
-                    {formatTimeAgo(chat.updated_at)}
-                  </span>
+          <div className="space-y-2">
+            {conversations.map((chat) => (
+              <div 
+                key={chat.id} 
+                className="group relative flex items-center gap-4 rounded-2xl border border-transparent p-4 hover:bg-background/80 hover:border-border/50 hover:shadow-sm transition-all cursor-pointer"
+                onClick={() => navigate(`/chat?conversation_id=${chat.id}`)}
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent/5 text-accent/60 group-hover:bg-accent/10 group-hover:text-accent transition-all ring-1 ring-accent/10">
+                  <MessageSquare className="h-4 w-4" />
                 </div>
-                <div className="flex gap-2 pt-1">
-                  {chat.is_favourite && (
-                    <span className="inline-flex items-center rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-medium text-yellow-600">
-                      ⭐ Favorite
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 mb-0.5">
+                    <p className="text-sm font-bold truncate text-foreground/80 group-hover:text-foreground">
+                      {chat.title}
+                    </p>
+                    <span className="text-[9px] font-black text-muted-foreground/40 uppercase whitespace-nowrap">
+                      {formatShortDate(chat.updated_at)}
                     </span>
-                  )}
-                  {chat.is_archived && (
-                    <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                      📦 Archived
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {chat.is_favourite && (
+                       <Badge variant="outline" className="text-[8px] font-black border-yellow-500/20 text-yellow-600/80 px-1.5 py-0 h-4 bg-yellow-500/5">⭐</Badge>
+                    )}
+                    <span className="text-[9px] font-medium text-muted-foreground/60 truncate">
+                       Sync ID: {chat.id.slice(0, 8)}...
                     </span>
-                  )}
+                  </div>
                 </div>
+
+                <ArrowRight className="h-3 w-3 text-muted-foreground/20 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      <Button 
+         variant="outline" 
+         className="w-full h-11 rounded-2xl border-dashed border-border/60 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 hover:text-accent hover:border-accent/40 hover:bg-accent/5 transition-all"
+         onClick={() => navigate("/chat")}
+      >
+        Access Full Archive
+        <ArrowRight className="ml-2 h-3 w-3" />
+      </Button>
+    </div>
   );
 };
 
 export const InsightsWidget = () => {
   return (
-    <Card className="h-full bg-gradient-to-br from-accent/5 to-teal-500/5 border-accent/20">
-      <CardHeader>
-        <CardTitle className="text-xl font-heading flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-accent" />
-          Smart Takeaways
-        </CardTitle>
-        <CardDescription>Key points from your recent interactions</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="rounded-xl bg-background/80 p-4 shadow-sm backdrop-blur-sm border border-accent/10">
-          <p className="text-sm font-medium text-accent mb-2">From "React Hooks Explanation"</p>
-          <p className="text-sm text-muted-foreground">
-            "useEffect runs after every render by default. Add a dependency array [] to run it only once on mount."
-          </p>
-          <Button variant="link" className="h-auto p-0 text-xs mt-2 text-accent">View Context</Button>
+    <div className="space-y-6">
+      <div className="bg-gradient-to-br from-accent/5 to-teal-500/5 rounded-3xl border border-accent/10 p-6 space-y-6 shadow-sm">
+        <div className="space-y-4">
+          <div className="group rounded-2xl bg-background/60 p-5 shadow-sm border border-border/40 hover:border-accent/40 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+               <span className="text-[9px] font-black uppercase tracking-widest text-accent/80">React Architecture</span>
+               <Sparkles className="h-3 w-3 text-accent" />
+            </div>
+            <p className="text-sm font-bold leading-relaxed text-foreground/80 lowercase first-letter:uppercase">
+              "useEffect runs after every render by default. Use dependency arrays to optimize performance."
+            </p>
+            <div className="mt-4 flex items-center justify-between">
+                <Button variant="link" className="h-auto p-0 text-[10px] font-black uppercase tracking-widest text-accent/60 hover:text-accent">View Source</Button>
+                <span className="text-[8px] font-bold text-muted-foreground/30">Synced 2h ago</span>
+            </div>
+          </div>
+
+          <div className="group rounded-2xl bg-background/60 p-5 shadow-sm border border-border/40 hover:border-blue-500/40 hover:shadow-md transition-all">
+            <div className="flex items-center justify-between mb-3">
+               <span className="text-[9px] font-black uppercase tracking-widest text-blue-600/80">Project Management</span>
+               <TrendingUp className="h-3 w-3 text-blue-600" />
+            </div>
+            <p className="text-sm font-bold leading-relaxed text-foreground/80 lowercase first-letter:uppercase">
+              "Key milestone: MVP launch scheduled for Dec 15th. Focus on core features first."
+            </p>
+            <div className="mt-4 flex items-center justify-between">
+                <Button variant="link" className="h-auto p-0 text-[10px] font-black uppercase tracking-widest text-blue-600/60 hover:text-blue-600">Analyze Context</Button>
+                <span className="text-[8px] font-bold text-muted-foreground/30">Synced 5h ago</span>
+            </div>
+          </div>
         </div>
-        <div className="rounded-xl bg-background/80 p-4 shadow-sm backdrop-blur-sm border border-accent/10">
-          <p className="text-sm font-medium text-accent mb-2">From "Project Planning"</p>
-          <p className="text-sm text-muted-foreground">
-            "Key milestone: MVP launch scheduled for Dec 15th. Focus on core features first."
-          </p>
-          <Button variant="link" className="h-auto p-0 text-xs mt-2 text-accent">View Context</Button>
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full border-accent/20 hover:bg-accent/5">
-          View All Insights
+
+        <Button variant="outline" className="w-full h-11 rounded-2xl border-dashed border-border/60 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 hover:text-accent hover:border-accent/40 hover:bg-accent/5 transition-all">
+          View All Smart Takeaways
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+
+      {/* Proactive Tip Section */}
+      <div className="bg-muted/30 rounded-3xl p-6 border border-border/40">
+         <div className="flex items-center gap-2 mb-4">
+            <Zap className="h-4 w-4 text-yellow-500" />
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/60">Neural Tip</h4>
+         </div>
+         <p className="text-xs font-bold italic text-muted-foreground/80 leading-relaxed">
+           "Your focus has been heavy on frontend state management lately. Would you like to review backend optimization strategies next?"
+         </p>
+      </div>
+    </div>
   );
 };
 

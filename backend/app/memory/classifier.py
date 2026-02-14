@@ -1,4 +1,4 @@
-from app.schemas.memory import MemoryClassificationResult, MemoryType
+from app.schemas.memory import MemoryClassificationResult
 from app.ai.chat_engine import classify_fact_structured
 import json
 
@@ -26,6 +26,7 @@ class MemoryClassifier:
             Classification result with type, importance, and storage decision
         """
         response = classify_fact_structured(user_message,old_facts)
+        print(f"[CLASSIFIER] Raw response: category={response.category}, key={response.key}, value={response.value}, should_store={response.should_store}")
         try:
             
             if not response.should_store:

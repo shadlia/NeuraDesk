@@ -1,5 +1,5 @@
 import { client } from "./client";
-import { LLMRequest, LLMResponse, Conversation, Message } from "../types/api";
+import { LLMRequest, LLMResponse, Conversation, Message, MemoryFact } from "../types/api";
 
 export const api = {
   askLLM: async (data: LLMRequest): Promise<LLMResponse> => {
@@ -37,6 +37,18 @@ export const api = {
 
   deleteConversation: async (conversationId: string): Promise<void> => {
     return client<void>(`/api/v1/conversations/${conversationId}`, {
+      method: "DELETE",
+    });
+  },
+
+  getMemories: async (userId: string): Promise<MemoryFact[]> => {
+    return client<MemoryFact[]>(`/api/v1/memory/${userId}`, {
+      method: "GET",
+    });
+  },
+
+  deleteMemory: async (factId: string, userId: string): Promise<void> => {
+    return client<void>(`/api/v1/memory/${factId}?user_id=${userId}`, {
       method: "DELETE",
     });
   },

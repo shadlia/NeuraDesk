@@ -10,6 +10,7 @@ class MemoryType(str, Enum):
     PREFERENCE = "preference"  # Likes, dislikes, habits
     PROJECT = "project"  # Project names, IDs, goals
     EPHEMERAL = "ephemeral"  # Temporary context (not stored long-term)
+    PROJECT_MILESTONE = "project_milestone"  # Project milestones
 
 
 

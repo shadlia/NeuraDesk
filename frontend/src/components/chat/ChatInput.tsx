@@ -7,11 +7,17 @@ import { cn } from "@/lib/utils";
 interface ChatInputProps {
   onSend: (message: string) => void;
   disabled?: boolean;
+  defaultValue?: string;
 }
 
-export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
-  const [input, setInput] = useState("");
+export const ChatInput = ({ onSend, disabled, defaultValue = "" }: ChatInputProps) => {
+  const [input, setInput] = useState(defaultValue);
   const maxLength = 2000;
+
+  // Update input if defaultValue changes (e.g. navigation from Widget)
+  useState(() => {
+    if (defaultValue) setInput(defaultValue);
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1 import chat
+from app.api.v1 import chat, memory
 
 app = FastAPI(title="NeuraDesk Backend - Phase 1")
 
@@ -14,6 +14,7 @@ app.add_middleware(
 )
 
 app.include_router(chat.router, prefix="/api/v1", tags=["chat"])
+app.include_router(memory.router, prefix="/api/v1/memory", tags=["memory"])
 
 @app.get("/api/v1/health")
 def root():

@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/api";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { formatMessageDate } from "@/lib/utils";
 
 interface Message {
@@ -22,6 +22,7 @@ const Index = () => {
   const { session, signOut } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
@@ -30,6 +31,9 @@ const Index = () => {
   const [conversationTitle, setConversationTitle] = useState("New Conversation");
   const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
   const { toast } = useToast();
+  
+  // Check for initial message from navigation state (e.g. from GrowthBoardWidget)
+  const initialMessage = location.state?.initialMessage || "";
 
   // Load conversation history when conversation_id changes
   useEffect(() => {
@@ -175,7 +179,7 @@ const Index = () => {
             isLoading={isLoadingHistory}
           />
           <ChatArea messages={messages} isTyping={isTyping} />
-          <ChatInput onSend={handleSendMessage} disabled={isTyping} />
+          <ChatInput onSend={handleSendMessage} disabled={isTyping} defaultValue={initialMessage} />
         </main>
       </div>
     </div>

@@ -41,7 +41,7 @@ class VectorRepository:
         user_id: str, 
         query_embedding: List[float],
         limit: int = 5,
-        match_threshold: float = 0.5
+        match_threshold: float = 0.3
     ) -> List[dict]:
         """
         Search for similar embeddings using cosine similarity.
@@ -56,7 +56,7 @@ class VectorRepository:
                 "p_user_id": user_id
             }
         ).execute()
-
+    
         return result.data
     
     async def delete_embeddings(self, user_id: str, ids: List[str]) -> bool:
