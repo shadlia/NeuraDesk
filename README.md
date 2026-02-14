@@ -78,7 +78,7 @@
 | Phase | TODO / Description | Skills / Concepts | Tools / Tech | Expected Output |
 |-------|-----------------|-----------------|---------------|----------------|
 | **1. Setup and LLM API Base** | ✅ **Done** - FastAPI backend with Gemini 2.0 Flash, LangChain integration, Langfuse monitoring | Prompting, JSON output, LLM observability | Gemini 2.0 API, FastAPI, LangChain, Langfuse | User asks question → AI answers from text input |
-| **2. Memory & Context** | ✅ **Done** - Conversation history, "Smart Memory" (Structured + Vector), Session management | Vector stores (long-term), User profiling | Supabase (pgvector), Postgres RPC, LangChain Memory | AI remembers you, your past chats, and preferences |
+| **2. Memory & Context** | ✅ **Done** - "Smart Memory" (Structured + Vector RAG), Conversation history | Vector stores (long-term), User profiling | Supabase (pgvector), Postgres RPC, LangChain Memory | AI remembers you, your past chats, and preferences |
 | **3. Document Ingestion / RAG** | 🔄 **Next Up** - Add PDF / HTML ingestion → store embeddings → searchable | Embeddings, chunking, vector DB, retrieval | HuggingFace Embeddings, Supabase Vector | Ask questions → AI answers using documents |
 | **4. Multimodal Support** | TODO: Add image, screenshot, audio ingestion + OCR | Image → text, audio transcription, TTS | Gemini Vision, Whisper, XTTS, OpenCV | AI can understand images / screenshots / audio and answer questions |
 | **5. Agents & Automation** | TODO: Enable AI to perform tasks like web scraping, form filling, email sending | Tool calling, multi-step reasoning, memory | LangChain / LlamaIndex, Selenium / Playwright | AI completes automated workflows for the user |
