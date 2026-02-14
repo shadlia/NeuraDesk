@@ -41,7 +41,7 @@
   - [x] **Hybrid Storage:** 
     - **Structured:** Supabase for exact facts.
     - **Vector:** `pgvector` with **HuggingFace Embeddings** (768d) for semantic search.
-  - [x] **Context Injection:** Auto-retrieval of relevant memories.
+  - [x] **Memory RAG:** Auto-retrieval of semantically relevant memories using Vector Search.
   - [x] **Background Processing:** Non-blocking memory extraction
 - [x] **Conversation Persistence:**
   - [x] **Conversation Management:** Create and track conversations per user
@@ -60,12 +60,11 @@
   - [x] Conversation and Message repositories
 
 ### 🔄 In Progress
-- [ ] **RAG Integration:** Connecting Vector Search results to LLM context window.
 - [ ] **Document Ingestion:** Uploading PDFs/MD files to vector store.
-- [ ] Streaming responses
+- [ ] **Streaming Responses:** Implement real-time token streaming.
 
 ### 📋 Phase 2 Next Steps
-1. **Refine RAG:** Connect vector retrieval to `ChatService` for long-term memory recall.
+1. **Document RAG:** Implement PDF/File ingestion for knowledge base.
 2. **Monitor Classification:** Fine-tune the LLM prompt to ensure consistent skill/milestone detection.
 3. **Memory Explorer:** Advanced UI to browse and manage all stored memories.
 4. **Archive:** Implement "Archive" functionality for old chats.
