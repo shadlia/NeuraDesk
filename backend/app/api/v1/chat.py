@@ -5,7 +5,6 @@ from app.schemas.messages import Message
 from app.services.chat_service import ChatService
 from app.database.repositories.conversations import ConversationRepository
 from app.database.repositories.messages import MessageRepository
-from app.ai.llm import _llm_service
 from typing import List
 
 router = APIRouter()

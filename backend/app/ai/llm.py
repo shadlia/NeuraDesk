@@ -1,79 +1,57 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage, SystemMessage
-from app.intergrations.langfuse import LangfuseConfig
 import os
-from langgraph.checkpoint.memory import InMemorySaver
+import json
+from typing import Optional, List
 
-from typing import Optional, Type, TypeVar, List
 from pydantic import BaseModel
-from app.schemas.classification_schema import MemoryClassificationSchema
+from langgraph.checkpoint.memory import InMemorySaver
 from langchain.agents import create_agent
-from langchain.agents.structured_output import ToolStrategy
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFaceEndpointEmbeddings
 
-T = TypeVar('T', bound=BaseModel)
+from app.intergrations.langfuse import LangfuseConfig
 
 
 class LLMService:
     """
     Unified service for interacting with LLMs via LangChain + Langfuse.
     Handles prompt loading, message formatting, and model invocation.
-    Currently supports Gemini, but designed to be extensible for other providers.
+
+    Models used:
+        - Chat: DeepSeek-V3 (via HuggingFace Inference API)
+        - Classification: Qwen2.5-72B-Instruct (via HuggingFace Inference API)
+        - Embeddings: all-mpnet-base-v2 (via HuggingFace Endpoint)
     """
-    
+
+    # Model identifiers
+    CHAT_MODEL = "deepseek-ai/DeepSeek-V3"
+    CLASSIFICATION_MODEL = "Qwen/Qwen2.5-72B-Instruct"
+    EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
+
     def __init__(
-        self, 
-        model_name: str = "deepseek-ai/DeepSeek-V3",
+        self,
+        model_name: str = CHAT_MODEL,
         temperature: float = 0.4,
-        api_key: Optional[str] = None,
-        memory_saver: Optional[InMemorySaver] = None
     ):
-        """
-        Initialize the LLM service.
-        
-        Args:
-            model_name: LLM model to use (e.g., "gemini-2.5-flash", "gpt-4", etc.)
-            temperature: Model temperature (0.0 - 1.0)
-            api_key: Optional API key, defaults to GEMINI_API_KEY env var
-        """
         self.model_name = model_name
         self.temperature = temperature
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.hf_token = os.getenv("HUGGINGFACE_API_KEY")
         self.memory_saver = InMemorySaver()
-    def _create_gemini_model(
-        self, 
-        name: Optional[str] = None,
-        response_format: Optional[dict] = None
-    ) -> ChatGoogleGenerativeAI:
-        """
-        Create a Gemini model instance for fast classification.
-        """
-        kwargs = {
-            "model": "gemini-2.0-flash",  # Fast model for classification
-            "api_key": self.api_key,
-            "temperature": self.temperature,
-        }
-        if name:
-            kwargs["name"] = name
-        if response_format:
-            kwargs["model_kwargs"] = {"response_mime_type": "application/json"}
-        return ChatGoogleGenerativeAI(**kwargs)
-    def _create_huggingface_model(self, repo_id: Optional[str] = None):
-        """
-        Create a HuggingFace Chat model using the Inference API.
-        Uses ChatHuggingFace wrapper for chat-style interactions.
-        """
+
+    # ── Model Factories ──────────────────────────────────────────────
+
+    def _create_huggingface_model(self, repo_id: Optional[str] = None) -> ChatHuggingFace:
+        """Create a HuggingFace Chat model using the Inference API."""
         model_id = repo_id or self.model_name
         llm = HuggingFaceEndpoint(
             repo_id=model_id,
-            huggingfacehub_api_token=os.getenv("HUGGINGFACE_API_KEY"),
+            huggingfacehub_api_token=self.hf_token,
             task="text-generation",
             max_new_tokens=1024,
             temperature=self.temperature,
         )
-        chat_model = ChatHuggingFace(llm=llm)
-        return chat_model
+        return ChatHuggingFace(llm=llm)
+
+    # ── Core Invoke ──────────────────────────────────────────────────
 
     def invoke(
         self,
@@ -85,85 +63,97 @@ class LLMService:
         use_short_term_memory: Optional[bool] = False,
     ) -> str:
         """
-        Invoke HuggingFace models for both chat and classification.
-        Uses different models to avoid rate limits.
+        Invoke the appropriate HuggingFace model.
+
+        For classification (structured_output is set):
+            Uses Qwen to extract JSON matching the Pydantic schema.
+        For chat (default):
+            Uses DeepSeek-V3 with LangGraph agent and short-term memory.
         """
         langfuse_config = LangfuseConfig()
         prompt_template = langfuse_config.get_prompt(prompt_name).prompt[0]["content"]
-        
-        # Use a smaller/faster HuggingFace model for classification
+
+        # ── Classification Path ──────────────────────────────────────
         if structured_output:
-            # Use Qwen for classification (available on HF serverless inference)
-            model = self._create_huggingface_model("Qwen/Qwen2.5-72B-Instruct")
-            messages = [{"role": "system", "content": prompt_template}, {"role": "user", "content": user_content}]
-            response = model.invoke(messages)
-            
-            # Parse the response into structured output
-            import json
-            try:
-                # Try to extract JSON from the response
-                content = response.content
-                # Find JSON in the response
-                if "{" in content and "}" in content:
-                    json_start = content.find("{")
-                    json_end = content.rfind("}") + 1
-                    json_str = content[json_start:json_end]
-                    data = json.loads(json_str)
-                    return structured_output(**data)
-            except Exception as e:
-                print(f"Classification parse error: {e}")
-                # Return a default "don't store" classification
-                return structured_output(
-                    should_store=False,
-                    category="ephemeral",
-                    key="none",
-                    value="",
-                    importance=0.0
-                )
-            return response
-        
-        # Use HuggingFace for regular chat
-        model = self._create_huggingface_model()
-        agent = create_agent(
-            model=model,
-            checkpointer=self.memory_saver
+            return self._invoke_classification(prompt_template, user_content, structured_output)
+
+        # ── Chat Path ────────────────────────────────────────────────
+        return self._invoke_chat(prompt_template, user_content, trace_name, conversation_id, langfuse_config)
+
+    # ── Private Helpers ──────────────────────────────────────────────
+
+    def _invoke_classification(self, prompt_template: str, user_content: str, structured_output):
+        """Run classification via Qwen with JSON schema enforcement."""
+        model = self._create_huggingface_model(self.CLASSIFICATION_MODEL)
+
+        schema_str = json.dumps(structured_output.model_json_schema(), indent=2)
+        system_instruction = (
+            f"{prompt_template}\n\n"
+            f"IMPORTANT: You MUST respond ONLY with valid JSON that matches the following schema:\n{schema_str}"
         )
+
+        messages = [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": user_content},
+        ]
+        response = model.invoke(messages)
+
+        try:
+            content = response.content
+            if "{" in content and "}" in content:
+                json_str = content[content.find("{"):content.rfind("}") + 1]
+                data = json.loads(json_str)
+                return structured_output(**data)
+        except Exception as e:
+            print(f"[CLASSIFICATION] Parse error: {e}")
+
+        # Fallback: return a "don't store" classification
+        return structured_output(
+            should_store=False,
+            category="ephemeral",
+            key="none",
+            value="",
+            importance=0.0,
+            reason="Parse error — could not extract valid JSON from model response",
+        )
+
+    def _invoke_chat(self, prompt_template, user_content, trace_name, conversation_id, langfuse_config):
+        """Run chat via DeepSeek-V3 with LangGraph agent + short-term memory."""
+        model = self._create_huggingface_model()
+        agent = create_agent(model=model, checkpointer=self.memory_saver)
+
         response = agent.invoke(
-            {"messages": [{"role": "assistant", "content": prompt_template}, {"role": "user", "content": user_content}]},
+            {"messages": [
+                {"role": "assistant", "content": prompt_template},
+                {"role": "user", "content": user_content},
+            ]},
             config={
                 "callbacks": [langfuse_config._initialize_with_langchain()],
                 "run_name": trace_name,
-                "configurable": {"thread_id": conversation_id}
-            }
+                "configurable": {"thread_id": conversation_id},
+            },
         )
-        print(response)
-        
-        # Handle empty response
+
+        # Extract content from last non-empty message
         last_msg = response["messages"][-1]
-        content = getattr(last_msg, 'content', '') or ''
+        content = getattr(last_msg, "content", "") or ""
         if not content.strip() and len(response["messages"]) > 1:
-            content = getattr(response["messages"][-2], 'content', '') or ''
+            content = getattr(response["messages"][-2], "content", "") or ""
         return content
 
+    # ── Embeddings ───────────────────────────────────────────────────
+
     def get_embedding(self, text: str) -> List[float]:
-        """
-        Generate embedding for a given text using Google GenerativeAIEmbeddings.
-        
-        Args:
-            text: Text to embed
-            
-        Returns:
-            List of embedding floats
-        """
+        """Generate an embedding vector for the given text."""
         embeddings = HuggingFaceEndpointEmbeddings(
-            model="sentence-transformers/all-mpnet-base-v2",
+            model=self.EMBEDDING_MODEL,
             task="feature-extraction",
-            huggingfacehub_api_token=os.getenv("HUGGINGFACE_API_KEY"),
+            huggingfacehub_api_token=self.hf_token,
         )
         emb = embeddings.embed_query(text)
-        print(f"[EMBEDDING] Text: {text[:20]}... | Size: {len(emb)}")
+        print(f"[EMBEDDING] Text: {text[:30]}... | Dimensions: {len(emb)}")
         return emb
 
 
-# Singleton instance for reuse
+# Singleton instance for reuse across the app
 _llm_service = LLMService()

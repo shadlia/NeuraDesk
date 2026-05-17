@@ -1,6 +1,5 @@
 from app.schemas.chat_models import ChatRequest, ChatResponse
 from app.memory.manager import MemoryManager
-from app.ai.llm import _llm_service
 from app.ai.chat_engine import ai_response
 from typing import Optional
 from app.database.repositories.conversations import ConversationRepository
