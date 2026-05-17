@@ -7,7 +7,12 @@ app = FastAPI(title="NeuraDesk Backend - Phase 1")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://localhost:5173", "http://127.0.0.1:8080", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:8080",
+        "http://localhost:5173",
+        "http://127.0.0.1:8080",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -15,6 +20,7 @@ app.add_middleware(
 
 app.include_router(chat.router, prefix="/api/v1", tags=["chat"])
 app.include_router(memory.router, prefix="/api/v1/memory", tags=["memory"])
+
 
 @app.get("/api/v1/health")
 def root():

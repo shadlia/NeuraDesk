@@ -30,7 +30,7 @@ export const GrowthBoardWidget = () => {
     const [loading, setLoading] = React.useState(true);
     const [selectedProject, setSelectedProject] = React.useState<ProjectGroup | null>(null);
 
-    const fetchMemories = async () => {
+    const fetchMemories = React.useCallback(async () => {
         if (!user?.id) return;
         setLoading(true);
         try {
@@ -41,11 +41,11 @@ export const GrowthBoardWidget = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id]);
 
     React.useEffect(() => {
         fetchMemories();
-    }, [user?.id]);
+    }, [fetchMemories]);
 
     const handleDelete = async (factId: string) => {
         if (!user?.id) return;
@@ -466,7 +466,7 @@ const SkillBadge = ({ item, onDelete }: any) => {
 
 const ContextItem = ({ item, onDelete }: any) => {
     const isBoolean = item.value.toLowerCase() === 'true';
-    let content = isBoolean ? 
+    const content = isBoolean ? 
         <span className="font-bold">{formatKey(item.key)}</span> : 
         <><span className="opacity-50 font-medium mr-1">{formatKey(item.key)}:</span><span className="font-bold text-foreground/90">{item.value}</span></>;
 

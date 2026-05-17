@@ -1,0 +1,35 @@
+# Same as Black
+line-length = 100
+target-version = "py311"
+
+# Exclude common non-source directories
+exclude = [
+    "venv",
+    ".venv",
+    "__pycache__",
+    "migrations",
+    "notebooks",
+    "data",
+]
+
+[lint]
+# Enable common rule sets
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (import sorting)
+    "UP",   # pyupgrade (modernize syntax)
+    "B",    # flake8-bugbear (common bugs)
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in argument defaults (FastAPI uses this)
+]
+
+[lint.isort]
+known-first-party = ["app"]
+
+[format]
+quote-style = "double"
+indent-style = "space"

@@ -6,6 +6,7 @@ from datetime import datetime
 
 class MemoryType(str, Enum):
     """Classification of memory facts"""
+
     PERSONAL = "personal"  # Name, age, location, job title
     PREFERENCE = "preference"  # Likes, dislikes, habits
     PROJECT = "project"  # Project names, IDs, goals
@@ -13,10 +14,9 @@ class MemoryType(str, Enum):
     PROJECT_MILESTONE = "project_milestone"  # Project milestones
 
 
-
-
 class MemoryFact(BaseModel):
     """Represents a single memory fact"""
+
     id: Optional[str] = None
     user_id: str
     category: MemoryType
@@ -30,6 +30,7 @@ class MemoryFact(BaseModel):
 
 class MemoryQuery(BaseModel):
     """Query to retrieve relevant memories"""
+
     user_id: str
     query: str
     limit: int = 5
@@ -37,6 +38,7 @@ class MemoryQuery(BaseModel):
 
 class MemoryClassificationResult(BaseModel):
     """Result from the classifier"""
+
     category: str
     importance: float
     key: str

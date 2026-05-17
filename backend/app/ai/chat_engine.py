@@ -42,9 +42,7 @@ def ai_response(
         AI response as a string.
     """
     user_content = (
-        f"Context:\n{context}\n\n"
-        f"Message:\n{user_message}\n\n"
-        f"Information about user:\n{user_facts}"
+        f"Context:\n{context}\n\nMessage:\n{user_message}\n\nInformation about user:\n{user_facts}"
     )
 
     return _llm_service.invoke(

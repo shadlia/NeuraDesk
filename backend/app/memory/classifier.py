@@ -2,33 +2,35 @@ from app.schemas.memory import MemoryClassificationResult
 from app.ai.chat_engine import classify_fact_structured
 import json
 
+
 class MemoryClassifier:
     """
     Classifies incoming facts to determine:
     1. Type (personal, preference, project, ephemeral)
     2. Importance (high, medium, low)
     3. Whether to store it
-    
+
     Uses a Langfuse prompt for classification logic.
     """
-    
+
     def __init__(self):
         pass
-    
-    async def classify_fact(self, user_message: str,old_facts: str) -> MemoryClassificationResult:
+
+    async def classify_fact(self, user_message: str, old_facts: str) -> MemoryClassificationResult:
         """
         Analyze a conversation turn to extract and classify facts.
-        
+
         Args:
             user_message: What the user said
-        
+
         Returns:
             Classification result with type, importance, and storage decision
         """
-        response = classify_fact_structured(user_message,old_facts)
-        print(f"[CLASSIFIER] Raw response: category={response.category}, key={response.key}, value={response.value}, should_store={response.should_store}")
+        response = classify_fact_structured(user_message, old_facts)
+        print(
+            f"[CLASSIFIER] Raw response: category={response.category}, key={response.key}, value={response.value}, should_store={response.should_store}"
+        )
         try:
-            
             if not response.should_store:
                 return MemoryClassificationResult(
                     category="ephemeral",
@@ -36,18 +38,18 @@ class MemoryClassifier:
                     key="",
                     value="",
                     should_store=False,
-                    reason=response.reason
+                    reason=response.reason,
                 )
-            
+
             return MemoryClassificationResult(
                 category=response.category,
                 importance=response.importance,
                 key=response.key,
                 value=response.value,
                 should_store=True,
-                reason=response.reason
+                reason=response.reason,
             )
-        
+
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             return MemoryClassificationResult(
                 category="ephemeral",
@@ -55,5 +57,5 @@ class MemoryClassifier:
                 key="",
                 value="",
                 should_store=False,
-                reason=f"Classification failed: {str(e)}"
+                reason=f"Classification failed: {str(e)}",
             )

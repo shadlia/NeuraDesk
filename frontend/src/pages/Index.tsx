@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Navigation } from "@/components/layout/Navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { ChatArea } from "@/components/chat/ChatArea";
@@ -36,21 +36,7 @@ const Index = () => {
   const initialMessage = location.state?.initialMessage || "";
 
   // Load conversation history when conversation_id changes
-  useEffect(() => {
-    const conversationId = searchParams.get("conversation_id");
-    
-    if (conversationId && conversationId !== currentConversationId) {
-      loadConversationHistory(conversationId);
-    } else if (!conversationId && currentConversationId) {
-      // Clear messages when starting a new conversation
-      setMessages([]);
-      setCurrentConversationId(null);
-      setIsFavorite(false);
-      setConversationTitle("New Conversation");
-    }
-  }, [searchParams]);
-
-  const loadConversationHistory = async (conversationId: string) => {
+  const loadConversationHistory = useCallback(async (conversationId: string) => {
     setIsLoadingHistory(true);
     try {
       const messagesData = await api.getMessages(conversationId);
@@ -83,7 +69,21 @@ const Index = () => {
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    const conversationId = searchParams.get("conversation_id");
+    
+    if (conversationId && conversationId !== currentConversationId) {
+      loadConversationHistory(conversationId);
+    } else if (!conversationId && currentConversationId) {
+      // Clear messages when starting a new conversation
+      setMessages([]);
+      setCurrentConversationId(null);
+      setIsFavorite(false);
+      setConversationTitle("New Conversation");
+    }
+  }, [searchParams, currentConversationId, loadConversationHistory]);
 
   const handleToggleFavorite = async () => {
     if (!currentConversationId) {

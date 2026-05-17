@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class LangfuseClientSingleton:
     _instance = None
 
@@ -23,28 +24,25 @@ class LangfuseClientSingleton:
 
 class LangfuseConfig:
     def __init__(self):
-      
+
         self.langfuse = LangfuseClientSingleton.get_instance()
 
     def _initialize_with_langchain(self):
         """Initialize Langfuse callback handler for LangChain.
-        
+
         In Langfuse v3, the CallbackHandler uses the global client configuration.
         Session ID and trace name should be passed via LangChain's runnable config.
         """
-        handler = CallbackHandler(
-            public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-            update_trace=True
-        )
+        handler = CallbackHandler(public_key=os.getenv("LANGFUSE_PUBLIC_KEY"), update_trace=True)
         return handler
 
-    def get_prompt(self, prompt_name, label=None,version=None):
+    def get_prompt(self, prompt_name, label=None, version=None):
         if label and version:
             return self.langfuse.get_prompt(
                 prompt_name,
                 label=label,
                 version=version,
-            )   
+            )
         elif label:
             return self.langfuse.get_prompt(
                 prompt_name,

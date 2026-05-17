@@ -15,11 +15,7 @@ export const UserProfileWidget = () => {
     const [memories, setMemories] = React.useState<MemoryFact[]>([]);
     const [loading, setLoading] = React.useState(true);
 
-    React.useEffect(() => {
-        fetchMemories();
-    }, [user?.id]);
-
-    const fetchMemories = async () => {
+    const fetchMemories = React.useCallback(async () => {
         if (!user?.id) return;
         try {
             const data = await api.getMemories(user.id);
@@ -29,7 +25,11 @@ export const UserProfileWidget = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user?.id]);
+
+    React.useEffect(() => {
+        fetchMemories();
+    }, [fetchMemories]);
 
     const handleDelete = async (factId: string) => {
         if (!user?.id) return;

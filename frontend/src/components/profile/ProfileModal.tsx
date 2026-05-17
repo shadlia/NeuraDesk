@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { User, Mail, Lock, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -56,9 +56,9 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
     if (open && user) {
       loadProfile();
     }
-  }, [open, user]);
+  }, [open, user, loadProfile]);
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     setIsLoading(true);
     try {
       const profileData = await getUserProfile();
@@ -68,7 +68,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
         setLastName(profileData.last_name || "");
         setEmail(profileData.email || "");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If users table doesn't exist yet, fallback to auth metadata
       console.log("Users table not found, using auth metadata");
       
@@ -92,7 +92,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();

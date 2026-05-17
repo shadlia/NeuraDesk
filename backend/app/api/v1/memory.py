@@ -5,11 +5,9 @@ from typing import List, Optional
 
 router = APIRouter()
 
+
 @router.get("/{user_id}", response_model=List[MemoryFact])
-async def get_memories(
-    user_id: str, 
-    category: Optional[MemoryType] = None
-):
+async def get_memories(user_id: str, category: Optional[MemoryType] = None):
     """
     Get all structured memories for a user.
     Optionally filter by category (personal, preference, project).
@@ -20,6 +18,7 @@ async def get_memories(
         return facts
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.delete("/{fact_id}")
 async def delete_memory(fact_id: str, user_id: str):

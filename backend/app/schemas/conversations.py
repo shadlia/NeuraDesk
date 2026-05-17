@@ -10,6 +10,7 @@ class Conversation(BaseModel):
     created_at: str
     updated_at: str
 
+
 class ConversationUpdate(BaseModel):
     title: str = None
     is_favourite: bool = None

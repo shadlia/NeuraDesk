@@ -138,7 +138,7 @@ class MemoryManager:
     def _build_search_context(relevant_memories: Optional[List] = None) -> str:
         """Extract text values from memory objects/dicts into a single context string."""
         results = []
-        for m in (relevant_memories or []):
+        for m in relevant_memories or []:
             if hasattr(m, "value"):
                 results.append(m.value)
             elif isinstance(m, dict):
@@ -196,18 +196,25 @@ class MemoryManager:
                     continue
 
                 # Exact phrase match: "project <name>"
-                if f"project {project_name}" in new_value_clean or f"project {project_name}" in new_key_clean:
+                if (
+                    f"project {project_name}" in new_value_clean
+                    or f"project {project_name}" in new_key_clean
+                ):
                     print(f"[ENTITY RESOLUTION] Matched via 'project {project_name}' -> {base_key}")
                     return base_key
 
                 # Key-part match: e.g. key="project_x_update" contains part "x"
                 if project_name in new_key_clean.split(" "):
-                    print(f"[ENTITY RESOLUTION] Matched via key part '{project_name}' -> {base_key}")
+                    print(
+                        f"[ENTITY RESOLUTION] Matched via key part '{project_name}' -> {base_key}"
+                    )
                     return base_key
 
                 # Substring match for longer names (>= 4 chars to avoid false positives)
                 if len(project_name) >= 4 and project_name in new_value_clean:
-                    print(f"[ENTITY RESOLUTION] Matched via substring '{project_name}' -> {base_key}")
+                    print(
+                        f"[ENTITY RESOLUTION] Matched via substring '{project_name}' -> {base_key}"
+                    )
                     return base_key
 
             return None
@@ -217,14 +224,16 @@ class MemoryManager:
             return None
 
     @staticmethod
-    def _collect_existing_projects(profile: dict, relevant_memories: Optional[List] = None) -> List[dict]:
+    def _collect_existing_projects(
+        profile: dict, relevant_memories: Optional[List] = None
+    ) -> List[dict]:
         """Pool all known project keys from profile and relevant memories."""
         projects = []
 
         if profile and "projects" in profile:
             projects.extend(profile["projects"])
 
-        for rm in (relevant_memories or []):
+        for rm in relevant_memories or []:
             cat = getattr(rm, "category", "")
             key = getattr(rm, "key", "")
             val = getattr(rm, "value", "")
@@ -265,7 +274,10 @@ class MemoryManager:
         # category == PROJECT
         if base_project_key:
             # Update to existing project -> treat as milestone
-            return f"{base_project_key}_milestone_{date_str}_{ts_short}", MemoryType.PROJECT_MILESTONE
+            return (
+                f"{base_project_key}_milestone_{date_str}_{ts_short}",
+                MemoryType.PROJECT_MILESTONE,
+            )
 
         # Brand new project
         if not fact_key.startswith("project_"):
@@ -302,9 +314,7 @@ class MemoryManager:
         interesting = [
             p.capitalize()
             for p in key_parts
-            if p.lower() not in noise
-            and not p[0].isdigit()
-            and p.lower() not in base_parts
+            if p.lower() not in noise and not p[0].isdigit() and p.lower() not in base_parts
         ]
 
         if interesting:

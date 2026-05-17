@@ -5,7 +5,11 @@ from typing import Optional, List
 from pydantic import BaseModel
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain.agents import create_agent
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace, HuggingFaceEndpointEmbeddings
+from langchain_huggingface import (
+    HuggingFaceEndpoint,
+    ChatHuggingFace,
+    HuggingFaceEndpointEmbeddings,
+)
 
 from app.intergrations.langfuse import LangfuseConfig
 
@@ -78,7 +82,9 @@ class LLMService:
             return self._invoke_classification(prompt_template, user_content, structured_output)
 
         # ── Chat Path ────────────────────────────────────────────────
-        return self._invoke_chat(prompt_template, user_content, trace_name, conversation_id, langfuse_config)
+        return self._invoke_chat(
+            prompt_template, user_content, trace_name, conversation_id, langfuse_config
+        )
 
     # ── Private Helpers ──────────────────────────────────────────────
 
@@ -101,7 +107,7 @@ class LLMService:
         try:
             content = response.content
             if "{" in content and "}" in content:
-                json_str = content[content.find("{"):content.rfind("}") + 1]
+                json_str = content[content.find("{") : content.rfind("}") + 1]
                 data = json.loads(json_str)
                 return structured_output(**data)
         except Exception as e:
@@ -117,16 +123,20 @@ class LLMService:
             reason="Parse error — could not extract valid JSON from model response",
         )
 
-    def _invoke_chat(self, prompt_template, user_content, trace_name, conversation_id, langfuse_config):
+    def _invoke_chat(
+        self, prompt_template, user_content, trace_name, conversation_id, langfuse_config
+    ):
         """Run chat via DeepSeek-V3 with LangGraph agent + short-term memory."""
         model = self._create_huggingface_model()
         agent = create_agent(model=model, checkpointer=self.memory_saver)
 
         response = agent.invoke(
-            {"messages": [
-                {"role": "assistant", "content": prompt_template},
-                {"role": "user", "content": user_content},
-            ]},
+            {
+                "messages": [
+                    {"role": "assistant", "content": prompt_template},
+                    {"role": "user", "content": user_content},
+                ]
+            },
             config={
                 "callbacks": [langfuse_config._initialize_with_langchain()],
                 "run_name": trace_name,

@@ -9,6 +9,7 @@ from typing import List
 
 router = APIRouter()
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     chat_service = ChatService()
@@ -45,12 +46,14 @@ async def get_messages(conversation_id: str):
 async def test(req: ChatRequest):
     return ChatResponse(message=req.question, answer=answer)
 
+
 @router.patch("/conversations/{conversation_id}")
 async def update_conversation(conversation_id: str, update: ConversationUpdate):
     """Update conversation title or favorite status"""
     repo = ConversationRepository()
     repo.update_conversation(conversation_id, title=update.title, is_favorite=update.is_favourite)
     return {"status": "success"}
+
 
 @router.delete("/conversations/{conversation_id}")
 async def delete_conversation(conversation_id: str):
